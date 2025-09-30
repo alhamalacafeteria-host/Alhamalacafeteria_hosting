@@ -20,11 +20,7 @@
         }
     </style>
 </head>
-<body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script><script>
-const SUPABASE_URL = "https://hdtbveombnhozbxognvr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
+<body>
 <h1>Al Hamala Cafeteria</h1>
 <div class="login-container">
 <h2>Login</h2>
@@ -696,5 +692,10 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+</script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script><script>
+const SUPABASE_URL = "https://hdtbveombnhozbxognvr.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 </script></body>
 </html>

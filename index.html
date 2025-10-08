@@ -696,5 +696,21 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-</script></body>
+</script>
+<script>
+  async function testSupabaseConnection() {
+    const { data, error } = await supabase.from('entries').select('*').limit(1);
+
+    if (error) {
+      console.error('❌ Supabase connection failed:', error.message);
+      alert('Supabase connection failed. Check console for details.');
+    } else {
+      console.log('✅ Supabase connection successful:', data);
+      alert('Supabase connection successful!');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', testSupabaseConnection);
+</script>
+</body>
 </html>

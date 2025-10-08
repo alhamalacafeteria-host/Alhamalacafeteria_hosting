@@ -696,40 +696,5 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-</script><script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const tableBody = document.getElementById('entries-table-body');
-  if (!tableBody) {
-    console.error("❌ 'entries-table-body' not found in DOM.");
-    return;
-  }
-
-  const { data, error } = await supabase.from('entries').select('*');
-
-  if (error) {
-    console.error('Error fetching entries:', error.message);
-    tableBody.innerHTML = '<tr><td colspan="6">Error loading entries</td></tr>';
-    return;
-  }
-
-  if (!data || data.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="6">No entries found</td></tr>';
-    return;
-  }
-
-  tableBody.innerHTML = '';
-  data.forEach(entry => {
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${entry.date}</td>
-      <td>${entry.type}</td>
-      <td>${entry.cash_or_account}</td>
-      <td>${entry.amount}</td>
-      <td>${entry.description}</td>
-      <td></td>
-    `;
-    tableBody.appendChild(row);
-  });
-});
 </script></body>
 </html>

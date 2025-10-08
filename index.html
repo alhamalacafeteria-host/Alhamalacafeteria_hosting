@@ -177,7 +177,19 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 <section id="list">
 <h2>Entries</h2>
 <div class="table-wrap">
-<table><thead><tr><th>Date (dd/mm/yyyy)</th><th>Type</th><th>Cash/Account</th><th>Amount</th><th>Description</th><th>Actions</th></tr></thead><tbody id="entries-table-body"><tr><td colspan="6">No entries yet. Add your first one above.</td></tr></tbody></table>
+<table>
+<thead>
+<tr>
+<th style="min-width:120px">Date (dd/mm/yyyy)</th>
+<th>Type</th>
+<th>Cash/Account</th>
+<th class="num">Amount</th>
+<th>Description</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="entries"></tbody>
+<tbody id="entries-table-body"><tr><td colspan="6">No entries yet. Add your first one above.</td></tr></tbody></table>
 </div>
 <p class="muted" id="empty">No entries yet. Add your first one above.</p>
 </section>
@@ -683,6 +695,41 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+});
+</script><script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const tableBody = document.getElementById('entries-table-body');
+  if (!tableBody) {
+    console.error("❌ 'entries-table-body' not found in DOM.");
+    return;
+  }
+
+  const { data, error } = await supabase.from('entries').select('*');
+
+  if (error) {
+    console.error('Error fetching entries:', error.message);
+    tableBody.innerHTML = '<tr><td colspan="6">Error loading entries</td></tr>';
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="6">No entries found</td></tr>';
+    return;
+  }
+
+  tableBody.innerHTML = '';
+  data.forEach(entry => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${entry.date}</td>
+      <td>${entry.type}</td>
+      <td>${entry.cash_or_account}</td>
+      <td>${entry.amount}</td>
+      <td>${entry.description}</td>
+      <td></td>
+    `;
+    tableBody.appendChild(row);
+  });
 });
 </script></body>
 </html>

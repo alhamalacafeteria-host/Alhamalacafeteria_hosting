@@ -1,700 +1,214 @@
 
 <!DOCTYPE html>
-
 <html>
 <head>
-<title>Login - Restaurant Accounts Report</title>
-<style>
-        body { font-family: Arial, sans-serif; }
-        h1 { text-align: center; color: #333; }
-        .login-container {
-            width: 300px;
-            margin: 20px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .hidden { display: none; }
-        .logout-btn {
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script><script>
-const SUPABASE_URL = "https://hdtbveombnhozbxognvr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
-<h1>Al Hamala Cafeteria</h1>
-<div class="login-container">
-<h2>Login</h2>
-<label for="username">Username:</label><br/>
-<input id="username" type="text"/><br/><br/>
-<label for="password">Password:</label><br/>
-<input id="password" type="password"/><br/><br/>
-<input id="rememberMe" type="checkbox"/> Remember Me<br/><br/>
-<button onclick="validateLogin()">Login</button>
-<p id="error" style="color:red;"></p>
-</div>
-<div class="hidden" id="report">
-<button class="logout-btn" onclick="logout()">Logout</button>
-<!DOCTYPE html>
-
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Restaurant Accounts Manager</title>
-<style>
-    *{box-sizing:border-box}
-    :root{ --bg:#0b1416; --card:#0f1f23; --muted:#94a3b8; --text:#e2e8f0; --accent:#0f766e; --danger:#ef4444 }
-    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-    header{padding:16px 16px 8px;position:sticky;top:0;background:linear-gradient(180deg,rgba(11,20,22,.95),rgba(11,20,22,.85));backdrop-filter:blur(6px);border-bottom:1px solid #0b2a2f;z-index:3}
-    h1{margin:0 0 12px;font-size:20px}
-    #summary{display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:8px}
-    .card{background:var(--card);padding:10px;border-radius:10px;border:1px solid #0b2a2f}
-    .card span{color:var(--muted);font-size:12px}
-    .card strong{display:block;margin-top:4px;font-size:18px}
-    .small{font-size:12px;display:flex;justify-content:space-between;margin-top:6px;color:#cbd5e1}
-    main{padding:16px;display:grid;gap:16px}
-    section{background:var(--card);padding:12px;border-radius:10px;border:1px solid #0b2a2f}
-    h2{margin:0 0 10px;font-size:16px;color:#cbd5e1}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media(min-width:920px){main{grid-template-columns:1fr 1fr} #list, #monthly{grid-column:1/-1}}
-    label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#cbd5e1}
-    input,select,button{padding:10px;border-radius:8px;border:1px solid #0b2a2f;background:#0b1416;color:var(--text)}
-    input::placeholder{color:#7b8a9a}
-    .hint{color:#94a3b8;font-size:11px;margin-top:4px}
-    .actions{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
-    .actions .spacer{flex:1}
-    button.primary{background:var(--accent);border-color:var(--accent)}
-    button.secondary{background:#0b1416}
-    button.link{background:transparent;border:none;color:#93c5fd;text-decoration:underline;padding:4px 6px}
-    button.danger{background:var(--danger);border-color:var(--danger)}
-    table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid #0b2a2f;padding:10px;vertical-align:top}
-    th{text-align:left;color:#93a4b3;font-weight:600;position:sticky;top:0;background:var(--card);z-index:2}
-    td.num{text-align:right}
-    tfoot td{font-weight:600}
-    .muted{color:var(--muted)}
-    footer{padding:12px 16px;color:var(--muted)}
-    .pill{display:inline-flex;align-items:center;border:1px solid #334155;border-radius:999px;padding:2px 8px;font-size:12px}
-    .grid{display:grid;gap:8px}
-    .grid.cols-4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
-    .table-wrap{overflow:auto}
+  <meta charset="UTF-8">
+  <title>Restaurant Accounts - Supabase Only</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    input, select { margin: 5px; padding: 5px; }
+    .section { margin-bottom: 40px; }
   </style>
 </head>
 <body>
-<header>
-<h1>Restaurant Accounts Manager</h1>
-<div id="summary">
-<div class="card"><span>Total Income</span><strong id="sum-income">0.000</strong></div>
-<div class="card"><span>Total Expense</span><strong id="sum-expense">0.000</strong></div>
-<div class="card"><span>Net</span><strong id="sum-net">0.000</strong></div>
-<div class="card">
-<span>Cash</span>
-<div class="small"><em>Income</em><em id="cash-inc">0.000</em></div>
-<div class="small"><em>Expense</em><em id="cash-exp">0.000</em></div>
+
+<h1>Restaurant Accounts Management (Supabase Only)</h1>
+
+<div class="section">
+  <h2>Add Entry</h2>
+  <form id="entry-form">
+    <input type="text" id="date" placeholder="Date (dd/mm/yyyy)" required>
+    <select id="type">
+      <option value="Income">Income</option>
+      <option value="Expense">Expense</option>
+    </select>
+    <select id="cash_or_account">
+      <option value="Cash">Cash</option>
+      <option value="Benefit">Benefit</option>
+    </select>
+    <input type="number" id="amount" placeholder="Amount" required>
+    <input type="text" id="description" placeholder="Description">
+    <button type="submit">Add Entry</button>
+  </form>
 </div>
-<div class="card">
-<span>Benefit</span>
-<div class="small"><em>Income</em><em id="ben-inc">0.000</em></div>
-<div class="small"><em>Expense</em><em id="ben-exp">0.000</em></div>
+
+<div class="section">
+  <h2>All Entries</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Cash/Account</th>
+        <th>Amount</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody id="entries-table-body">
+      <tr><td colspan="5">Loading...</td></tr>
+    </tbody>
+  </table>
 </div>
+
+<div class="section">
+  <h2>Monthly Report</h2>
+  <input type="month" id="report-month">
+  <button onclick="generateMonthlyReport()">Generate</button>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Cash Income</th>
+        <th>Cash Expense</th>
+        <th>Benefit Income</th>
+        <th>Benefit Expense</th>
+        <th>Net</th>
+      </tr>
+    </thead>
+    <tbody id="monthly-report-body">
+      <tr><td colspan="6">No report yet.</td></tr>
+    </tbody>
+  </table>
 </div>
-</header>
-<main>
-<section id="entry">
-<h2>Add / Edit Entry</h2>
-<form id="entry-form">
-<input id="entry-id" type="hidden"/>
-<div class="row">
-<label>Date
-          <input id="date" required="" type="date"/>
-<span class="hint">Calendar enabled; dates shown &amp; CSV-exported as <strong>dd/mm/yyyy</strong>.</span>
-</label>
-<label>Type
-          <select id="type" required="">
-<option value="Income">Income</option>
-<option selected="" value="Expense">Expense</option>
-</select>
-</label>
+
+<div class="section">
+  <h2>Daily Sales</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Total Income</th>
+      </tr>
+    </thead>
+    <tbody id="daily-sales-body">
+      <tr><td colspan="2">No data yet.</td></tr>
+    </tbody>
+  </table>
 </div>
-<div class="row">
-<label>Cash / Account
-          <select id="account" required="">
-<option value="Cash">Cash</option>
-<option value="Benefit">Benefit</option>
-</select>
-</label>
-<label>Amount
-          <input id="amount" inputmode="decimal" min="0" placeholder="0.000" required="" step="0.001" type="number"/>
-</label>
-</div>
-<label>Description
-        <input id="description" placeholder="e.g., Lunch sales, Vegetables, Supplier invoice" type="text"/>
-</label>
-<div class="actions">
-<button class="primary" type="submit">Save</button>
-<button class="secondary" id="reset-btn" type="button">Reset</button>
-</div>
-</form>
-</section>
-<section id="filters">
-<h2>Filter</h2>
-<div class="row">
-<label>From
-        <input id="filter-from" type="date"/>
-</label>
-<label>To
-        <input id="filter-to" type="date"/>
-</label>
-<label>Type
-        <select id="filter-type">
-<option value="All">All</option>
-<option value="Income">Income</option>
-<option value="Expense">Expense</option>
-</select>
-</label>
-<label>Account
-        <select id="filter-account">
-<option value="All">All</option>
-<option value="Cash">Cash</option>
-<option value="Benefit">Benefit</option>
-</select>
-</label>
-</div>
-<div class="actions">
-<button class="secondary" id="apply-filter">Apply</button>
-<button class="secondary" id="clear-filter">Clear</button>
-<div class="spacer"></div>
-<button class="secondary" id="export-json">Export JSON</button>
-<button class="secondary" id="export-csv">Export CSV</button>
-<button class="secondary" id="export-xlsx">Export Excel (.xlsx)</button>
-<label class="pill">Import JSON<input accept="application/json" hidden="" id="import-json" type="file"/></label>
-</div>
-</section>
-<section id="list">
-<h2>Entries</h2>
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th style="min-width:120px">Date (dd/mm/yyyy)</th>
-<th>Type</th>
-<th>Cash/Account</th>
-<th class="num">Amount</th>
-<th>Description</th>
-<th>Actions</th>
-</tr>
-</thead>
-<tbody id="entries"></tbody>
-<tbody id="entries-table-body"><tr><td colspan="6">No entries yet. Add your first one above.</td></tr></tbody></table>
-</div>
-<p class="muted" id="empty">No entries yet. Add your first one above.</p>
-</section>
-<section id="monthly">
-<h2>Monthly Report</h2>
-<div class="row">
-<label>Month
-        <input id="report-month" type="month"/>
-</label>
-<div class="actions">
-<button class="secondary" id="report-generate">Generate</button>
-<div class="spacer"></div>
-<button class="secondary" id="report-export-csv">Export Report CSV</button>
-</div>
-</div>
-<div class="grid cols-4" id="report-cards"></div>
-<div class="table-wrap">
-<table id="report-table">
-<thead>
-<tr>
-<th style="min-width:120px">Date</th>
-<th class="num">Cash Income</th>
-<th class="num">Cash Expense</th>
-<th class="num">Benefit Income</th>
-<th class="num">Benefit Expense</th>
-<th class="num">Daily Net</th>
-</tr>
-</thead>
-<tbody></tbody>
-<tfoot></tfoot>
-</table>
-</div>
-</section>
-</main>
-<footer>
-<p class="muted">Data is saved to your device (local storage). Excel export needs internet the first time to load the library.</p>
-</footer>
-<!-- SheetJS (XLSX) for Excel export -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
+
 <script>
-  const STORAGE_KEY = 'restaurant_accounts_v1';
-  let entries = [];
+  const supabaseUrl = 'https://hdtbveombnhozbxognvr.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM';
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-  // --- Date helpers ---
-  function toDDMMYYYY(iso){
-    if(!iso) return '';
-    const [y,m,d] = iso.split('-');
-    return `${d}/${m}/${y}`;
-  }
-  function todayISO(){
-    const d=new Date();
-    const off=d.getTimezoneOffset();
-    return new Date(d.getTime()-off*60000).toISOString().slice(0,10);
-  }
-  function toISO(d){
-    return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
-  }
-  function monthStartEndISO(ym){
-    const [y,m] = ym.split('-').map(Number);
-    const start = new Date(y, m-1, 1);
-    const end = new Date(y, m, 0);
-    return {startISO: toISO(start), endISO: toISO(end)};
-  }
-  function fmt(n){
-    const fixed = Number(n||0).toFixed(3);
-    return fixed.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  }
-
-  // --- Storage ---
-  function load(){
-    const raw = localStorage.getItem(STORAGE_KEY);
-    entries = raw ? JSON.parse(raw) : [];
-  }
-  function save(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  }
-  function uid(){
-    return 't_' + Math.random().toString(36).slice(2,8) + Date.now().toString(36);
-  }
-
-  // --- Form ---
-  function clearForm(){
-    document.getElementById('entry-id').value='';
-    document.getElementById('date').value=todayISO();
-    document.getElementById('type').value='Expense';
-    document.getElementById('account').value='Cash';
-    document.getElementById('amount').value='';
-    document.getElementById('description').value='';
-  }
-  function fillForm(e){
-    document.getElementById('entry-id').value=e.id;
-    document.getElementById('date').value=e.date; // ISO for the native picker
-    document.getElementById('type').value=e.type;
-    document.getElementById('account').value=e.account;
-    document.getElementById('amount').value=e.amount;
-    document.getElementById('description').value=e.description||'';
-    window.scrollTo({top:0,behavior:'smooth'});
-  }
-
-  // --- Filters ---
-  function getFilters(){
-    return {
-      from: document.getElementById('filter-from').value || null,  // ISO yyyy-mm-dd
-      to: document.getElementById('filter-to').value || null,
-      type: document.getElementById('filter-type').value,
-      account: document.getElementById('filter-account').value
-    };
-  }
-  function applyFilters(list){
-    const f=getFilters();
-    return list.filter(e=>{
-      if (f.from && e.date < f.from) return false; // compare ISO strings
-      if (f.to && e.date > f.to) return false;
-      if (f.type !== 'All' && e.type !== f.type) return false;
-      if (f.account !== 'All' && e.account !== f.account) return false;
-      return true;
-    });
-  }
-
-  // --- Computations ---
-  function computeSums(list){
-    let inc=0, exp=0;
-    let cashInc=0, cashExp=0, benInc=0, benExp=0;
-    for(const e of list){
-      const amt = Number(e.amount||0);
-      if (e.type==='Income'){
-        inc += amt;
-        if (e.account==='Cash') cashInc += amt;
-        else if (e.account==='Benefit') benInc += amt;
-      } else {
-        exp += amt;
-        if (e.account==='Cash') cashExp += amt;
-        else if (e.account==='Benefit') benExp += amt;
-      }
-    }
-    return {inc, exp, cashInc, cashExp, benInc, benExp};
-  }
-
-  // --- Render entries list ---
-  function render(){
-    const tbody = document.getElementById('entries');
-    tbody.innerHTML='';
-    const filtered = applyFilters([...entries]).sort((a,b)=> (a.date===b.date ? b.createdAt-a.createdAt : a.date.localeCompare(b.date)) );
-    document.getElementById('empty').style.display = filtered.length ? 'none' : 'block';
-
-    const sums = computeSums(filtered);
-
-    for(const e of filtered){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${toDDMMYYYY(e.date)}</td>
-        <td>${e.type}</td>
-        <td>${e.account}</td>
-        <td class="num ${e.type==='Expense'?'muted':''}">${fmt(e.amount)}</td>
-        <td>${e.description||''}</td>
-        <td>
-          <button class="link" data-action="edit" data-id="${e.id}">Edit</button>
-          <button class="link" data-action="delete" data-id="${e.id}">Delete</button>
-        </td>`;
-      tbody.appendChild(tr);
-    }
-    document.getElementById('sum-income').textContent = fmt(sums.inc);
-    document.getElementById('sum-expense').textContent = fmt(sums.exp);
-    document.getElementById('sum-net').textContent = fmt(sums.inc - sums.exp);
-
-    document.getElementById('cash-inc').textContent = fmt(sums.cashInc);
-    document.getElementById('cash-exp').textContent = fmt(sums.cashExp);
-    document.getElementById('ben-inc').textContent  = fmt(sums.benInc);
-    document.getElementById('ben-exp').textContent  = fmt(sums.benExp);
-  }
-
-  // --- Actions ---
-  function onSubmit(ev){
-    ev.preventDefault();
-    const id = document.getElementById('entry-id').value || uid();
-    const dateISO = document.getElementById('date').value; // ISO from native picker
-    const type = document.getElementById('type').value;
-    const account = document.getElementById('account').value;
-    const amount = Number(document.getElementById('amount').value);
-    const description = document.getElementById('description').value.trim();
-
-    if (!dateISO) return alert('Please select a date');
-    if (!account) return alert('Please choose Cash/Account');
-    if (!(amount >= 0)) return alert('Please enter a valid amount');
-
-    const idx = entries.findIndex(x=>x.id===id);
-    const data = { id, date: dateISO, type, account, amount, description, createdAt: idx>=0 ? entries[idx].createdAt : Date.now() };
-    if (idx>=0) entries[idx]=data; else entries.push(data);
-    save();
-    clearForm();
-    render();
-  }
-
-  function onTableClick(ev){
-    const btn = ev.target.closest('button');
-    if (!btn) return;
-    const id = btn.getAttribute('data-id');
-    const entry = entries.find(e=>e.id===id);
-    if (!entry) return;
-    const action = btn.getAttribute('data-action');
-    if (action==='edit') fillForm(entry);
-    else if (action==='delete'){
-      if (confirm('Delete this entry?')){
-        entries = entries.filter(e=>e.id!==id);
-        save();
-        render();
-      }
-    }
-  }
-
-  // --- Export / Import ---
-  function exportJSON(){
-    const blob = new Blob([JSON.stringify(entries,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download='restaurant-accounts.json'; a.click();
-    URL.revokeObjectURL(url);
-  }
-  function exportCSV(){
-    const header = ['id','date','type','account','amount','description'];
-    const lines = [header.join(',')];
-    for(const e of entries){
-      const row = [e.id, toDDMMYYYY(e.date), e.type, (e.account||'').replaceAll(',', ' '), e.amount, (e.description||'').replaceAll(',', ' ')];
-      lines.push(row.join(','));
-    }
-    const blob = new Blob([lines.join('\n')], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download='restaurant-accounts.csv'; a.click();
-    URL.revokeObjectURL(url);
-  }
-  function exportExcel(){
-    if (typeof XLSX === 'undefined'){
-      alert('Excel export needs internet connection the first time to load the Excel library.');
+  async function fetchEntries() {
+    const { data, error } = await supabase.from('entries').select('*');
+    const tableBody = document.getElementById('entries-table-body');
+    if (error || !data) {
+      tableBody.innerHTML = '<tr><td colspan="5">Error loading entries</td></tr>';
       return;
     }
-    const wb = XLSX.utils.book_new();
-    const data = [['Date','Type','Account','Amount','Description']];
-    for(const e of entries){
-      const [y,m,d] = e.date.split('-').map(Number);
-      const jsDate = new Date(y, m-1, d);
-      data.push([jsDate, e.type, e.account, Number(e.amount||0), e.description||'']);
-    }
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for(let R=1; R<=range.e.r; ++R){
-      const cell = ws[XLSX.utils.encode_cell({r:R, c:0})];
-      if (cell){ cell.z = 'dd/mm/yyyy'; }
-    }
-    for(let R=1; R<=range.e.r; ++R){
-      const cell = ws[XLSX.utils.encode_cell({r:R, c:3})];
-      if (cell){ cell.t = 'n'; }
-    }
-    XLSX.utils.book_append_sheet(wb, ws, 'Entries');
-
-    const {inc, exp, cashInc, cashExp, benInc, benExp} = computeSums(entries);
-    const ws2 = XLSX.utils.aoa_to_sheet([
-      ['Metric','Value'],
-      ['Total Income', inc],
-      ['Total Expense', exp],
-      ['Net', inc - exp],
-      [],
-      ['Account','Income','Expense','Net'],
-      ['Cash', cashInc, cashExp, cashInc - cashExp],
-      ['Benefit', benInc, benExp, benInc - benExp]
-    ]);
-    XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
-
-    XLSX.writeFile(wb, 'restaurant-accounts.xlsx');
+    tableBody.innerHTML = '';
+    data.forEach(entry => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${entry.date}</td>
+        <td>${entry.type}</td>
+        <td>${entry.cash_or_account}</td>
+        <td>${entry.amount}</td>
+        <td>${entry.description}</td>
+      `;
+      tableBody.appendChild(row);
+    });
   }
 
-  function importJSONFile(file){
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const data = JSON.parse(reader.result);
-        if (!Array.isArray(data)) throw new Error('Invalid format');
-        const map = new Map(entries.map(e=>[e.id,e]));
-        for(const e of data){
-          if (!e.id) e.id = uid();
-          e.createdAt = e.createdAt || Date.now();
-          if (e.date && e.date.includes('/')){
-            const [d,m,y] = e.date.split('/');
-            if (d && m && y) e.date = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
-          }
-          map.set(e.id, e);
-        }
-        entries = Array.from(map.values());
-        save(); render(); alert('Import completed.');
-      }catch(err){ alert('Import failed: '+err.message); }
+  document.getElementById('entry-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const entry = {
+      date: document.getElementById('date').value,
+      type: document.getElementById('type').value,
+      cash_or_account: document.getElementById('cash_or_account').value,
+      amount: parseFloat(document.getElementById('amount').value),
+      description: document.getElementById('description').value
     };
-    reader.readAsText(file);
-  }
-
-  // --- Monthly report ---
-  function buildReportCards(sums){
-    const wrap = document.getElementById('report-cards');
-    wrap.innerHTML = '';
-    const items = [
-      {title:'Total Income', value: fmt(sums.inc)},
-      {title:'Total Expense', value: fmt(sums.exp)},
-      {title:'Net', value: fmt(sums.inc - sums.exp)},
-      {title:'Cash Income', value: fmt(sums.cashInc)},
-      {title:'Cash Expense', value: fmt(sums.cashExp)},
-      {title:'Benefit Income', value: fmt(sums.benInc)},
-      {title:'Benefit Expense', value: fmt(sums.benExp)},
-    ];
-    for(const it of items){
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `<span>${it.title}</span><strong>${it.value}</strong>`;
-      wrap.appendChild(div);
+    const { error } = await supabase.from('entries').insert([entry]);
+    if (error) {
+      alert('Error adding entry');
+    } else {
+      fetchEntries();
+      e.target.reset();
     }
-  }
+  });
 
-  function generateMonthlyReport(){
-    const ym = document.getElementById('report-month').value; // 'YYYY-MM'
-    if (!ym) { alert('Select a month'); return; }
-    const {startISO, endISO} = monthStartEndISO(ym);
-    const list = entries.filter(e => e.date >= startISO && e.date <= endISO);
-    const sums = computeSums(list);
-    buildReportCards(sums);
+  async function generateMonthlyReport() {
+    const monthInput = document.getElementById('report-month').value;
+    if (!monthInput) return;
+    const [year, month] = monthInput.split('-');
+    const { data, error } = await supabase.from('entries').select('*');
+    const reportBody = document.getElementById('monthly-report-body');
+    if (error || !data) {
+      reportBody.innerHTML = '<tr><td colspan="6">Error loading report</td></tr>';
+      return;
+    }
 
-    // Daily aggregation
-    const daily = new Map();
-    for(const e of list){
-      if (!daily.has(e.date)) daily.set(e.date, {cashInc:0,cashExp:0,benInc:0,benExp:0});
-      const d = daily.get(e.date);
-      const amt = Number(e.amount||0);
-      if (e.account==='Cash'){
-        if (e.type==='Income') d.cashInc += amt; else d.cashExp += amt;
-      } else if (e.account==='Benefit'){
-        if (e.type==='Income') d.benInc += amt; else d.benExp += amt;
+    const dailySummary = {};
+    data.forEach(entry => {
+      const [dd, mm, yyyy] = entry.date.split('/');
+      if (mm === month && yyyy === year) {
+        if (!dailySummary[entry.date]) {
+          dailySummary[entry.date] = { cash_income: 0, cash_expense: 0, benefit_income: 0, benefit_expense: 0 };
+        }
+        const summary = dailySummary[entry.date];
+        if (entry.type === 'Income') {
+          if (entry.cash_or_account === 'Cash') summary.cash_income += entry.amount;
+          else summary.benefit_income += entry.amount;
+        } else {
+          if (entry.cash_or_account === 'Cash') summary.cash_expense += entry.amount;
+          else summary.benefit_expense += entry.amount;
+        }
       }
-    }
-    const tbody = document.querySelector('#report-table tbody');
-    const tfoot = document.querySelector('#report-table tfoot');
-    tbody.innerHTML=''; tfoot.innerHTML='';
-
-    let TcashInc=0, TcashExp=0, TbenInc=0, TbenExp=0;
-    const dates = Array.from(daily.keys()).sort();
-    for(const iso of dates){
-      const d = daily.get(iso);
-      const net = (d.cashInc + d.benInc) - (d.cashExp + d.benExp);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${toDDMMYYYY(iso)}</td>
-        <td class="num">${fmt(d.cashInc)}</td>
-        <td class="num">${fmt(d.cashExp)}</td>
-        <td class="num">${fmt(d.benInc)}</td>
-        <td class="num">${fmt(d.benExp)}</td>
-        <td class="num">${fmt(net)}</td>`;
-      tbody.appendChild(tr);
-      TcashInc += d.cashInc; TcashExp += d.cashExp; TbenInc += d.benInc; TbenExp += d.benExp;
-    }
-    const Tnet = (TcashInc + TbenInc) - (TcashExp + TbenExp);
-    const trf = document.createElement('tr');
-    trf.innerHTML = `
-      <td>Total</td>
-      <td class="num">${fmt(TcashInc)}</td>
-      <td class="num">${fmt(TcashExp)}</td>
-      <td class="num">${fmt(TbenInc)}</td>
-      <td class="num">${fmt(TbenExp)}</td>
-      <td class="num">${fmt(Tnet)}</td>`;
-    tfoot.appendChild(trf);
-
-    // Keep the data for CSV export
-    generateMonthlyReport._last = { ym, rows: dates.map(iso=>({
-      date: toDDMMYYYY(iso),
-      cashInc: daily.get(iso).cashInc,
-      cashExp: daily.get(iso).cashExp,
-      benInc: daily.get(iso).benInc,
-      benExp: daily.get(iso).benExp,
-      net: (daily.get(iso).cashInc + daily.get(iso).benInc) - (daily.get(iso).cashExp + daily.get(iso).benExp)
-    })), totals: {TcashInc,TcashExp,TbenInc,TbenExp,Tnet}, sums };
-  }
-
-  function exportMonthlyCSV(){
-    const last = generateMonthlyReport._last;
-    if (!last) { alert('Generate the monthly report first.'); return; }
-    const lines = [];
-    lines.push(`Monthly Report, ${last.ym}`);
-    lines.push('Date,Cash Income,Cash Expense,Benefit Income,Benefit Expense,Net');
-    for(const r of last.rows){
-      lines.push([r.date, r.cashInc, r.cashExp, r.benInc, r.benExp, r.net].join(','));
-    }
-    lines.push('Total,'+[last.totals.TcashInc,last.totals.TcashExp,last.totals.TbenInc,last.totals.TbenExp,last.totals.Tnet].join(','));
-    lines.push('');
-    lines.push('Summary');
-    lines.push('Metric,Value');
-    lines.push('Total Income,'+last.sums.inc);
-    lines.push('Total Expense,'+last.sums.exp);
-    lines.push('Net,'+(last.sums.inc-last.sums.exp));
-    const blob = new Blob([lines.join('\n')], {type:'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download=`monthly-report-${last.ym}.csv`; a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  // --- Init ---
-  function init(){
-    load();
-    clearForm();
-    // Default filter: current month
-    const now = new Date();
-    const first = new Date(now.getFullYear(), now.getMonth(), 1);
-    const last = new Date(now.getFullYear(), now.getMonth()+1, 0);
-    document.getElementById('filter-from').value = toISO(first);
-    document.getElementById('filter-to').value = toISO(last);
-    document.getElementById('filter-type').value = 'All';
-    document.getElementById('filter-account').value = 'All';
-
-    // Default monthly report month
-    const ym = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    document.getElementById('report-month').value = ym;
-
-    render();
-
-    document.getElementById('entry-form').addEventListener('submit', onSubmit);
-    document.getElementById('reset-btn').addEventListener('click', clearForm);
-    document.querySelector('#list table').addEventListener('click', onTableClick);
-
-    document.getElementById('apply-filter').addEventListener('click', render);
-    document.getElementById('clear-filter').addEventListener('click', ()=>{
-      document.getElementById('filter-from').value='';
-      document.getElementById('filter-to').value='';
-      document.getElementById('filter-type').value='All';
-      document.getElementById('filter-account').value='All';
-      render();
-    });
-    document.getElementById('export-json').addEventListener('click', exportJSON);
-    document.getElementById('export-csv').addEventListener('click', exportCSV);
-    document.getElementById('export-xlsx').addEventListener('click', exportExcel);
-    document.getElementById('import-json').addEventListener('change', (e)=>{
-      if (e.target.files && e.target.files[0]) importJSONFile(e.target.files[0]);
-      e.target.value='';
     });
 
-    document.getElementById('report-generate').addEventListener('click', generateMonthlyReport);
-    document.getElementById('report-export-csv').addEventListener('click', exportMonthlyCSV);
-
-    // auto-generate report for current month once
-    generateMonthlyReport();
+    reportBody.innerHTML = '';
+    for (const date in dailySummary) {
+      const s = dailySummary[date];
+      const net = (s.cash_income + s.benefit_income) - (s.cash_expense + s.benefit_expense);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${date}</td>
+        <td>${s.cash_income.toFixed(2)}</td>
+        <td>${s.cash_expense.toFixed(2)}</td>
+        <td>${s.benefit_income.toFixed(2)}</td>
+        <td>${s.benefit_expense.toFixed(2)}</td>
+        <td>${net.toFixed(2)}</td>
+      `;
+      reportBody.appendChild(row);
+    }
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  async function generateDailySales() {
+    const { data, error } = await supabase.from('entries').select('*');
+    const salesBody = document.getElementById('daily-sales-body');
+    if (error || !data) {
+      salesBody.innerHTML = '<tr><td colspan="2">Error loading sales</td></tr>';
+      return;
+    }
+
+    const salesSummary = {};
+    data.forEach(entry => {
+      if (entry.type === 'Income') {
+        if (!salesSummary[entry.date]) salesSummary[entry.date] = 0;
+        salesSummary[entry.date] += entry.amount;
+      }
+    });
+
+    salesBody.innerHTML = '';
+    for (const date in salesSummary) {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${date}</td><td>${salesSummary[date].toFixed(2)}</td>`;
+      salesBody.appendChild(row);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    fetchEntries();
+    generateDailySales();
+  });
 </script>
+
 </body>
-</html>
-</div>
-<script>
-        window.onload = function() {
-            var savedUsername = localStorage.getItem("savedUsername");
-            if (savedUsername) {
-                document.getElementById("username").value = savedUsername;
-                document.getElementById("rememberMe").checked = true;
-            }
-        };
-
-        function validateLogin() {
-            var username = document.getElementById("username").value.trim();
-            var password = document.getElementById("password").value;
-            var rememberMe = document.getElementById("rememberMe").checked;
-
-            if (username === "alhamalacafeteria" && password === "P@ssw0rd") {
-                if (rememberMe) {
-                    localStorage.setItem("savedUsername", username);
-                } else {
-                    localStorage.removeItem("savedUsername");
-                }
-                document.querySelector(".login-container").style.display = "none";
-                document.getElementById("report").classList.remove("hidden");
-            } else {
-                document.getElementById("error").innerText = "Invalid username or password.";
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem("savedUsername");
-            location.reload();
-        }
-    </script>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const usernameInput = document.getElementById("username");
-    const rememberMeCheckbox = document.getElementById("rememberMe");
-
-    // Load stored username if available
-    if (localStorage.getItem("rememberedUsername")) {
-        usernameInput.value = localStorage.getItem("rememberedUsername");
-        rememberMeCheckbox.checked = true;
-    }
-
-    // Save username on form submit if 'Remember Me' is checked
-    const loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-        loginForm.addEventListener("submit", function() {
-            if (rememberMeCheckbox.checked) {
-                localStorage.setItem("rememberedUsername", usernameInput.value);
-            } else {
-                localStorage.removeItem("rememberedUsername");
-            }
-        });
-    }
-});
-</script></body>
 </html>

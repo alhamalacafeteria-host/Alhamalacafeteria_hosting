@@ -177,19 +177,19 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 <section id="list">
 <h2>Entries</h2>
 <div class="table-wrap">
-<table>
-<thead>
-<tr>
+<table><thead><tr>
 <th style="min-width:120px">Date (dd/mm/yyyy)</th>
 <th>Type</th>
 <th>Cash/Account</th>
 <th class="num">Amount</th>
 <th>Description</th>
 <th>Actions</th>
-</tr>
+</tr></thead>
+<thead>
+
 </thead>
-<tbody id="entries-table-body"></tbody>
-</table>
+<tbody id="entries"></tbody>
+<tbody id="entries-table-body"></tbody></table>
 </div>
 <p class="muted" id="empty">No entries yet. Add your first one above.</p>
 </section>
@@ -695,28 +695,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-});
-</script><script>
-document.addEventListener("DOMContentLoaded", async () => {
-  const tableBody = document.getElementById("entries-table-body");
-  const { data, error } = await supabase.from("entries").select("*");
-  if (error) {
-    console.error("Error fetching entries:", error);
-    return;
-  }
-  tableBody.innerHTML = "";
-  data.forEach(entry => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${entry.date}</td>
-      <td>${entry.type}</td>
-      <td>${entry.cash_or_account}</td>
-      <td>${entry.amount}</td>
-      <td>${entry.description}</td>
-      <td></td>
-    `;
-    tableBody.appendChild(row);
-  });
 });
 </script></body>
 </html>

@@ -1,214 +1,290 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Restaurant Accounts - Supabase Only</title>
+  <title>Al Hamala Cafeteria - Accounting Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    input, select { margin: 5px; padding: 5px; }
-    .section { margin-bottom: 40px; }
+    .hidden { display: none; }
+    .section { margin-bottom: 30px; }
+    input, select, button { margin: 5px; padding: 5px; }
+    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; }
   </style>
 </head>
 <body>
+  <h1>Al Hamala Cafeteria - Accounting Dashboard</h1>
 
-<h1>Restaurant Accounts Management (Supabase Only)</h1>
+  <!-- Login Section -->
+  <div id="login-section" class="section">
+    <h2>Login</h2>
+    <label>Username: <input type="text" id="username"></label><br>
+    <label>Password: <input type="password" id="password"></label><br>
+    <label><input type="checkbox" id="rememberMe"> Remember Me</label><br>
+    <button onclick="login()">Login</button>
+  </div>
 
-<div class="section">
-  <h2>Add Entry</h2>
-  <form id="entry-form">
-    <input type="text" id="date" placeholder="Date (dd/mm/yyyy)" required>
-    <select id="type">
-      <option value="Income">Income</option>
-      <option value="Expense">Expense</option>
-    </select>
-    <select id="cash_or_account">
-      <option value="Cash">Cash</option>
-      <option value="Benefit">Benefit</option>
-    </select>
-    <input type="number" id="amount" placeholder="Amount" required>
-    <input type="text" id="description" placeholder="Description">
-    <button type="submit">Add Entry</button>
-  </form>
-</div>
+  <!-- Dashboard -->
+  <div id="dashboard" class="section hidden">
+    <h2>Dashboard</h2>
+    <p>Total Income: <span id="totalIncome">0.000</span></p>
+    <p>Total Expense: <span id="totalExpense">0.000</span></p>
+    <p>Net: <span id="net">0.000</span></p>
+    <p>Cash Income/Expense: <span id="cash">0.000</span></p>
+    <p>Benefit Income/Expense: <span id="benefit">0.000</span></p>
+    <button onclick="logout()">Logout</button>
+  </div>
 
-<div class="section">
-  <h2>All Entries</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Type</th>
-        <th>Cash/Account</th>
-        <th>Amount</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody id="entries-table-body">
-      <tr><td colspan="5">Loading...</td></tr>
-    </tbody>
-  </table>
-</div>
+  <!-- Entry Form -->
+  <div id="entry-form" class="section hidden">
+    <h2>Add/Edit Entry</h2>
+    <label>Date: <input type="date" id="entryDate"></label><br>
+    <label>Type:
+      <select id="entryType">
+        <option>Income</option>
+        <option>Expense</option>
+      </select>
+    </label><br>
+    <label>Account:
+      <select id="entryAccount">
+        <option>Cash</option>
+        <option>Benefit</option>
+      </select>
+    </label><br>
+    <label>Amount: <input type="number" id="entryAmount" step="0.001"></label><br>
+    <label>Description: <input type="text" id="entryDescription"></label><br>
+    <button onclick="saveEntry()">Save</button>
+    <button onclick="resetForm()">Reset</button>
+  </div>
 
-<div class="section">
-  <h2>Monthly Report</h2>
-  <input type="month" id="report-month">
-  <button onclick="generateMonthlyReport()">Generate</button>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Cash Income</th>
-        <th>Cash Expense</th>
-        <th>Benefit Income</th>
-        <th>Benefit Expense</th>
-        <th>Net</th>
-      </tr>
-    </thead>
-    <tbody id="monthly-report-body">
-      <tr><td colspan="6">No report yet.</td></tr>
-    </tbody>
-  </table>
-</div>
+  <!-- Filter & Export -->
+  <div id="filter-section" class="section hidden">
+    <h2>Filter & Export</h2>
+    <label>Date From: <input type="date" id="filterFrom"></label>
+    <label>Date To: <input type="date" id="filterTo"></label><br>
+    <label>Type:
+      <select id="filterType">
+        <option>All</option>
+        <option>Income</option>
+        <option>Expense</option>
+      </select>
+    </label>
+    <label>Account:
+      <select id="filterAccount">
+        <option>All</option>
+        <option>Cash</option>
+        <option>Benefit</option>
+      </select>
+    </label><br>
+    <button onclick="applyFilter()">Apply</button>
+    <button onclick="clearFilter()">Clear</button><br>
+    <button onclick="exportData('json')">Export JSON</button>
+    <button onclick="exportData('csv')">Export CSV</button>
+    <button onclick="exportData('excel')">Export Excel</button><br>
+    <input type="file" id="importFile" accept=".json,.csv,.xlsx">
+    <button onclick="importData()">Import</button>
+  </div>
 
-<div class="section">
-  <h2>Daily Sales</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Total Income</th>
-      </tr>
-    </thead>
-    <tbody id="daily-sales-body">
-      <tr><td colspan="2">No data yet.</td></tr>
-    </tbody>
-  </table>
-</div>
+  <!-- Monthly Report -->
+  <div id="report-section" class="section hidden">
+    <h2>Monthly Report</h2>
+    <label>Select Month: <input type="month" id="reportMonth"></label>
+    <button onclick="generateReport()">Generate</button>
+    <button onclick="exportReport()">Export CSV</button>
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th>Date</th><th>Cash Income/Expense</th><th>Benefit Income/Expense</th><th>Daily Sale</th><th>Daily Net</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-<script>
-  const supabaseUrl = 'https://hdtbveombnhozbxognvr.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM';
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  <script>
+    const supabase = supabase.createClient(
+      'https://hdtbveombnhozbxognvr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM'
+    );
 
-  async function fetchEntries() {
-    const { data, error } = await supabase.from('entries').select('*');
-    const tableBody = document.getElementById('entries-table-body');
-    if (error || !data) {
-      tableBody.innerHTML = '<tr><td colspan="5">Error loading entries</td></tr>';
-      return;
-    }
-    tableBody.innerHTML = '';
-    data.forEach(entry => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${entry.date}</td>
-        <td>${entry.type}</td>
-        <td>${entry.cash_or_account}</td>
-        <td>${entry.amount}</td>
-        <td>${entry.description}</td>
-      `;
-      tableBody.appendChild(row);
-    });
-  }
-
-  document.getElementById('entry-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const entry = {
-      date: document.getElementById('date').value,
-      type: document.getElementById('type').value,
-      cash_or_account: document.getElementById('cash_or_account').value,
-      amount: parseFloat(document.getElementById('amount').value),
-      description: document.getElementById('description').value
-    };
-    const { error } = await supabase.from('entries').insert([entry]);
-    if (error) {
-      alert('Error adding entry');
-    } else {
-      fetchEntries();
-      e.target.reset();
-    }
-  });
-
-  async function generateMonthlyReport() {
-    const monthInput = document.getElementById('report-month').value;
-    if (!monthInput) return;
-    const [year, month] = monthInput.split('-');
-    const { data, error } = await supabase.from('entries').select('*');
-    const reportBody = document.getElementById('monthly-report-body');
-    if (error || !data) {
-      reportBody.innerHTML = '<tr><td colspan="6">Error loading report</td></tr>';
-      return;
+    function login() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      if (user === 'admin' && pass === 'admin') {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('entry-form').classList.remove('hidden');
+        document.getElementById('filter-section').classList.remove('hidden');
+        document.getElementById('report-section').classList.remove('hidden');
+      } else {
+        alert('Invalid credentials');
+      }
     }
 
-    const dailySummary = {};
-    data.forEach(entry => {
-      const [dd, mm, yyyy] = entry.date.split('/');
-      if (mm === month && yyyy === year) {
-        if (!dailySummary[entry.date]) {
-          dailySummary[entry.date] = { cash_income: 0, cash_expense: 0, benefit_income: 0, benefit_expense: 0 };
+    function logout() {
+      document.getElementById('login-section').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('entry-form').classList.add('hidden');
+      document.getElementById('filter-section').classList.add('hidden');
+      document.getElementById('report-section').classList.add('hidden');
+    }
+
+    function resetForm() {
+      document.getElementById('entryDate').value = '';
+      document.getElementById('entryType').value = 'Income';
+      document.getElementById('entryAccount').value = 'Cash';
+      document.getElementById('entryAmount').value = '';
+      document.getElementById('entryDescription').value = '';
+    }
+
+    async function saveEntry() {
+      const entry = {
+        date: document.getElementById('entryDate').value,
+        type: document.getElementById('entryType').value,
+        account: document.getElementById('entryAccount').value,
+        amount: parseFloat(document.getElementById('entryAmount').value),
+        description: document.getElementById('entryDescription').value
+      };
+      const { error } = await supabase.from('entries').insert([entry]);
+      if (error) {
+        alert('Error saving entry');
+        console.error(error);
+      } else {
+        alert('Entry saved');
+        resetForm();
+      }
+    }
+
+    async function exportData(format) {
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) return alert('Error fetching data');
+
+      if (format === 'json') {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        downloadFile(blob, 'entries.json');
+      } else if (format === 'csv') {
+        const csv = convertToCSV(data);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        downloadFile(blob, 'entries.csv');
+      } else if (format === 'excel') {
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Entries');
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+        downloadFile(blob, 'entries.xlsx');
+      }
+    }
+
+    function convertToCSV(data) {
+      const headers = Object.keys(data[0]);
+      const rows = data.map(row => headers.map(h => `"${row[h] ?? ''}"`).join(','));
+      return [headers.join(','), ...rows].join('
+');
+    }
+
+    function downloadFile(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function importData() {
+      const fileInput = document.getElementById('importFile');
+      const file = fileInput.files[0];
+      if (!file) return alert('Please select a file');
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        let entries = [];
+        if (file.name.endsWith('.json')) {
+          entries = JSON.parse(e.target.result);
+        } else if (file.name.endsWith('.csv')) {
+          entries = parseCSV(e.target.result);
+        } else if (file.name.endsWith('.xlsx')) {
+          const workbook = XLSX.read(e.target.result, { type: 'binary' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          entries = XLSX.utils.sheet_to_json(sheet);
         }
-        const summary = dailySummary[entry.date];
-        if (entry.type === 'Income') {
-          if (entry.cash_or_account === 'Cash') summary.cash_income += entry.amount;
-          else summary.benefit_income += entry.amount;
+
+        const { error } = await supabase.from('entries').insert(entries);
+        if (error) {
+          alert('Error importing data');
+          console.error(error);
         } else {
-          if (entry.cash_or_account === 'Cash') summary.cash_expense += entry.amount;
-          else summary.benefit_expense += entry.amount;
+          alert('Data imported successfully');
         }
+      };
+
+      if (file.name.endsWith('.xlsx')) {
+        reader.readAsBinaryString(file);
+      } else {
+        reader.readAsText(file);
       }
-    });
-
-    reportBody.innerHTML = '';
-    for (const date in dailySummary) {
-      const s = dailySummary[date];
-      const net = (s.cash_income + s.benefit_income) - (s.cash_expense + s.benefit_expense);
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${date}</td>
-        <td>${s.cash_income.toFixed(2)}</td>
-        <td>${s.cash_expense.toFixed(2)}</td>
-        <td>${s.benefit_income.toFixed(2)}</td>
-        <td>${s.benefit_expense.toFixed(2)}</td>
-        <td>${net.toFixed(2)}</td>
-      `;
-      reportBody.appendChild(row);
-    }
-  }
-
-  async function generateDailySales() {
-    const { data, error } = await supabase.from('entries').select('*');
-    const salesBody = document.getElementById('daily-sales-body');
-    if (error || !data) {
-      salesBody.innerHTML = '<tr><td colspan="2">Error loading sales</td></tr>';
-      return;
     }
 
-    const salesSummary = {};
-    data.forEach(entry => {
-      if (entry.type === 'Income') {
-        if (!salesSummary[entry.date]) salesSummary[entry.date] = 0;
-        salesSummary[entry.date] += entry.amount;
-      }
-    });
-
-    salesBody.innerHTML = '';
-    for (const date in salesSummary) {
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>${date}</td><td>${salesSummary[date].toFixed(2)}</td>`;
-      salesBody.appendChild(row);
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('
+');
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        const values = line.split(',');
+        const entry = {};
+        headers.forEach((h, i) => entry[h.trim()] = values[i].replace(/"/g, '').trim());
+        return entry;
+      });
     }
-  }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    fetchEntries();
-    generateDailySales();
-  });
-</script>
+    async function generateReport() {
+      const month = document.getElementById('reportMonth').value;
+      if (!month) return alert('Select a month');
 
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) return alert('Error fetching data');
+
+      const filtered = data.filter(e => e.date.startsWith(month));
+      const grouped = {};
+
+      filtered.forEach(e => {
+        const date = e.date;
+        if (!grouped[date]) grouped[date] = [];
+        grouped[date].push(e);
+      });
+
+      const tbody = document.querySelector('#reportTable tbody');
+      tbody.innerHTML = '';
+
+      Object.keys(grouped).forEach(date => {
+        const entries = grouped[date];
+        let cashIncome = 0, cashExpense = 0, benefitIncome = 0, benefitExpense = 0;
+        entries.forEach(e => {
+          if (e.account === 'Cash') {
+            if (e.type === 'Income') cashIncome += e.amount;
+            else cashExpense += e.amount;
+          } else {
+            if (e.type === 'Income') benefitIncome += e.amount;
+            else benefitExpense += e.amount;
+          }
+        });
+        const dailySale = cashIncome + benefitIncome;
+        const dailyNet = dailySale - (cashExpense + benefitExpense);
+        const row = `<tr><td>${date}</td><td>${(cashIncome - cashExpense).toFixed(3)}</td><td>${(benefitIncome - benefitExpense).toFixed(3)}</td><td>${dailySale.toFixed(3)}</td><td>${dailyNet.toFixed(3)}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+
+    function exportReport() {
+      const rows = Array.from(document.querySelectorAll('#reportTable tr'));
+      const csv = rows.map(row => Array.from(row.children).map(cell => cell.textContent).join(',')).join('
+');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      downloadFile(blob, 'monthly_report.csv');
+    }
+  </script>
 </body>
 </html>

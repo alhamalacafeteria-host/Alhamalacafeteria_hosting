@@ -59,50 +59,6 @@
     <button onclick="resetForm()">Reset</button>
   </div>
 
-  <!-- Filter & Export -->
-  <div id="filter-section" class="section hidden">
-    <h2>Filter & Export</h2>
-    <label>Date From: <input type="date" id="filterFrom"></label>
-    <label>Date To: <input type="date" id="filterTo"></label><br>
-    <label>Type:
-      <select id="filterType">
-        <option>All</option>
-        <option>Income</option>
-        <option>Expense</option>
-      </select>
-    </label>
-    <label>Account:
-      <select id="filterAccount">
-        <option>All</option>
-        <option>Cash</option>
-        <option>Benefit</option>
-      </select>
-    </label><br>
-    <button onclick="applyFilter()">Apply</button>
-    <button onclick="clearFilter()">Clear</button><br>
-    <button onclick="exportData('json')">Export JSON</button>
-    <button onclick="exportData('csv')">Export CSV</button>
-    <button onclick="exportData('excel')">Export Excel</button><br>
-    <input type="file" id="importFile" accept=".json,.csv,.xlsx">
-    <button onclick="importData()">Import</button>
-  </div>
-
-  <!-- Monthly Report -->
-  <div id="report-section" class="section hidden">
-    <h2>Monthly Report</h2>
-    <label>Select Month: <input type="month" id="reportMonth"></label>
-    <button onclick="generateReport()">Generate</button>
-    <button onclick="exportReport()">Export CSV</button>
-    <table id="reportTable">
-      <thead>
-        <tr>
-          <th>Date</th><th>Cash Income/Expense</th><th>Benefit Income/Expense</th><th>Daily Sale</th><th>Daily Net</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
   <script>
     const supabase = supabase.createClient(
       'https://hdtbveombnhozbxognvr.supabase.co',
@@ -116,8 +72,6 @@
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         document.getElementById('entry-form').classList.remove('hidden');
-        document.getElementById('filter-section').classList.remove('hidden');
-        document.getElementById('report-section').classList.remove('hidden');
       } else {
         alert('Invalid credentials');
       }
@@ -127,8 +81,36 @@
       document.getElementById('login-section').classList.remove('hidden');
       document.getElementById('dashboard').classList.add('hidden');
       document.getElementById('entry-form').classList.add('hidden');
-      document.getElementById('filter-section').classList.add('hidden');
-      document.getElementById('report-section').classList.add('hidden');
+    }
+
+    function resetForm() {
+      document.getElementById('entryDate').value = '';
+      document.getElementById('entryType').value = 'Income';
+      document.getElementById('entryAccount').value = 'Cash';
+      document.getElementById('entryAmount').value = '';
+      document.getElementById('entryDescription').value = '';
+    }
+
+    async function saveEntry() {
+      const entry = {
+        date: document.getElementById('entryDate').value,
+        type: document.getElementById('entryType').value,
+        account: document.getElementById('entryAccount').value,
+        amount: parseFloat(document.getElementById('entryAmount').value),
+        description: document.getElementById('entryDescription').value
+      };
+
+      console.log("Saving entry:", entry);
+
+      const { data, error } = await supabase.from('entries').insert([entry]);
+      if (error) {
+        alert('Error saving entry. Check console for details.');
+        console.error('Supabase insert error:', error);
+      } else {
+        alert('Entry saved successfully');
+        console.log('Supabase insert result:', data);
+        resetForm();
+      }
     }
   </script>
 </body>

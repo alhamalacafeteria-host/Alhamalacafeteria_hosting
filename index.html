@@ -92,12 +92,23 @@
     }
 
     async function saveEntry() {
+      const entryDate = document.getElementById('entryDate').value;
+      const entryType = document.getElementById('entryType').value;
+      const entryAccount = document.getElementById('entryAccount').value;
+      const entryAmount = parseFloat(document.getElementById('entryAmount').value);
+      const entryDescription = document.getElementById('entryDescription').value;
+
+      if (!entryDate || isNaN(entryAmount)) {
+        alert('Please enter a valid date and amount.');
+        return;
+      }
+
       const entry = {
-        date: document.getElementById('entryDate').value,
-        type: document.getElementById('entryType').value,
-        account: document.getElementById('entryAccount').value,
-        amount: parseFloat(document.getElementById('entryAmount').value),
-        description: document.getElementById('entryDescription').value
+        date: entryDate,
+        type: entryType,
+        account: entryAccount,
+        amount: entryAmount,
+        description: entryDescription || null
       };
 
       console.log("Saving entry:", entry);

@@ -60,10 +60,14 @@
   </div>
 
   <script>
-    const supabase = supabase.createClient(
-      'https://hdtbveombnhozbxognvr.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM'
-    );
+    let supabase;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      supabase = window.supabase.createClient(
+        'https://hdtbveombnhozbxognvr.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM'
+      );
+    });
 
     function login() {
       const user = document.getElementById('username').value.trim();
@@ -101,6 +105,12 @@
       };
 
       console.log("Saving entry:", entry);
+
+      if (!supabase) {
+        console.error("Supabase client not initialized");
+        alert("Supabase client not ready. Please reload the page.");
+        return;
+      }
 
       const { data, error } = await supabase.from('entries').insert([entry]);
       if (error) {

@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <title>Al Hamala Cafeteria - Accounting Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
     .hidden { display: none; }
@@ -72,6 +71,7 @@
         document.getElementById('login-section').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         document.getElementById('entry-form').classList.remove('hidden');
+        loadDashboard();
       } else {
         alert('Invalid credentials');
       }
@@ -121,7 +121,38 @@
         alert('Entry saved successfully');
         console.log('Supabase insert result:', data);
         resetForm();
+        loadDashboard();
       }
+    }
+
+    async function loadDashboard() {
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) {
+        console.error('Error loading dashboard data:', error);
+        return;
+      }
+
+      let totalIncome = 0, totalExpense = 0;
+      let cashIncome = 0, cashExpense = 0;
+      let benefitIncome = 0, benefitExpense = 0;
+
+      data.forEach(entry => {
+        if (entry.type === 'Income') {
+          totalIncome += entry.amount;
+          if (entry.account === 'Cash') cashIncome += entry.amount;
+          else if (entry.account === 'Benefit') benefitIncome += entry.amount;
+        } else if (entry.type === 'Expense') {
+          totalExpense += entry.amount;
+          if (entry.account === 'Cash') cashExpense += entry.amount;
+          else if (entry.account === 'Benefit') benefitExpense += entry.amount;
+        }
+      });
+
+      document.getElementById('totalIncome').textContent = totalIncome.toFixed(3);
+      document.getElementById('totalExpense').textContent = totalExpense.toFixed(3);
+      document.getElementById('net').textContent = (totalIncome - totalExpense).toFixed(3);
+      document.getElementById('cash').textContent = (cashIncome - cashExpense).toFixed(3);
+      document.getElementById('benefit').textContent = (benefitIncome - benefitExpense).toFixed(3);
     }
   </script>
 </body>

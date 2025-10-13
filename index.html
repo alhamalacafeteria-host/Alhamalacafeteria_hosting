@@ -58,9 +58,236 @@
 </head>
 <body>
   <h1>Al Hamala Cafeteria - Accounting Dashboard</h1>
-  <div class="section">
-    <h2>Welcome to the Lavender-Themed Dashboard</h2>
-    <p>This stylish interface helps you manage your restaurant's finances with ease.</p>
+
+  <!-- Login Section -->
+  <div id="login-section" class="section">
+    <h2>Login</h2>
+    <label>Username: <input type="text" id="username"></label><br>
+    <label>Password: <input type="password" id="password"></label><br>
+    <button onclick="login()">Login</button>
   </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="section hidden">
+    <h2>Dashboard</h2>
+    <p>Total Income: <span id="totalIncome">0.000</span></p>
+    <p>Total Expense: <span id="totalExpense">0.000</span></p>
+    <p>Net: <span id="net">0.000</span></p>
+    <p>Cash Income/Expense: <span id="cash">0.000</span></p>
+    <p>Benefit Income/Expense: <span id="benefit">0.000</span></p>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- Entry Form -->
+  <div id="entry-form" class="section hidden">
+    <h2>Add/Edit Entry</h2>
+    <input type="hidden" id="entryId">
+    <label>Date: <input type="date" id="entryDate"></label><br>
+    <label>Type:
+      <select id="entryType">
+        <option>Income</option>
+        <option>Expense</option>
+      </select>
+    </label><br>
+    <label>Account:
+      <select id="entryAccount">
+        <option>Cash</option>
+        <option>Benefit</option>
+      </select>
+    </label><br>
+    <label>Amount: <input type="number" id="entryAmount" step="0.001"></label><br>
+    <label>Description: <input type="text" id="entryDescription"></label><br>
+    <button onclick="saveEntry()">Save</button>
+    <button onclick="resetForm()">Reset</button>
+  </div>
+
+  <!-- Entries Table -->
+  <div id="entries-section" class="section hidden">
+    <h2>All Entries</h2>
+    <table id="entriesTable">
+      <thead>
+        <tr>
+          <th>Date</th><th>Type</th><th>Account</th><th>Amount</th><th>Description</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Monthly Summary -->
+  <div id="summary-section" class="section hidden">
+    <h2>Monthly Summary</h2>
+    <label>Select Month: <input type="month" id="summaryMonth"></label>
+    <button onclick="loadMonthlySummary()">Load Summary</button>
+    <table id="summaryTable">
+      <thead>
+        <tr>
+          <th>Date</th><th>Income</th><th>Expense</th><th>Net</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://hdtbveombnhozbxognvr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM'
+    );
+
+    function login() {
+      const user = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      if (user === 'admin' && pass === 'admin') {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        document.getElementById('entry-form').classList.remove('hidden');
+        document.getElementById('entries-section').classList.remove('hidden');
+        document.getElementById('summary-section').classList.remove('hidden');
+        loadDashboard();
+        loadEntries();
+      } else {
+        alert('Invalid credentials');
+      }
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    function resetForm() {
+      document.getElementById('entryId').value = '';
+      document.getElementById('entryDate').value = '';
+      document.getElementById('entryType').value = 'Income';
+      document.getElementById('entryAccount').value = 'Cash';
+      document.getElementById('entryAmount').value = '';
+      document.getElementById('entryDescription').value = '';
+    }
+
+    async function saveEntry() {
+      const id = document.getElementById('entryId').value;
+      const entry = {
+        date: document.getElementById('entryDate').value,
+        type: document.getElementById('entryType').value,
+        account: document.getElementById('entryAccount').value,
+        amount: parseFloat(document.getElementById('entryAmount').value),
+        description: document.getElementById('entryDescription').value || null
+      };
+
+      if (!entry.date || isNaN(entry.amount)) {
+        alert('Please enter valid date and amount.');
+        return;
+      }
+
+      let result;
+      if (id) {
+        result = await supabase.from('entries').update(entry).eq('id', id);
+      } else {
+        result = await supabase.from('entries').insert([entry]);
+      }
+
+      if (result.error) {
+        alert('Error saving entry');
+        console.error(result.error);
+      } else {
+        alert('Entry saved');
+        resetForm();
+        loadDashboard();
+        loadEntries();
+      }
+    }
+
+    async function loadDashboard() {
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) return console.error(error);
+
+      let totalIncome = 0, totalExpense = 0;
+      let cashIncome = 0, cashExpense = 0;
+      let benefitIncome = 0, benefitExpense = 0;
+
+      data.forEach(e => {
+        if (e.type === 'Income') {
+          totalIncome += e.amount;
+          if (e.account === 'Cash') cashIncome += e.amount;
+          else benefitIncome += e.amount;
+        } else {
+          totalExpense += e.amount;
+          if (e.account === 'Cash') cashExpense += e.amount;
+          else benefitExpense += e.amount;
+        }
+      });
+
+      document.getElementById('totalIncome').textContent = totalIncome.toFixed(3);
+      document.getElementById('totalExpense').textContent = totalExpense.toFixed(3);
+      document.getElementById('net').textContent = (totalIncome - totalExpense).toFixed(3);
+      document.getElementById('cash').textContent = (cashIncome - cashExpense).toFixed(3);
+      document.getElementById('benefit').textContent = (benefitIncome - benefitExpense).toFixed(3);
+    }
+
+    async function loadEntries() {
+      const { data, error } = await supabase.from('entries').select('*').order('date', { ascending: false });
+      if (error) return console.error(error);
+
+      const tbody = document.querySelector('#entriesTable tbody');
+      tbody.innerHTML = '';
+
+      data.forEach(e => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${e.date}</td><td>${e.type}</td><td>${e.account}</td><td>${e.amount.toFixed(3)}</td><td>${e.description || ''}</td>
+          <td><button onclick="editEntry('${e.id}', '${e.date}', '${e.type}', '${e.account}', ${e.amount}, '${e.description || ''}')">Edit</button>
+              <button onclick="deleteEntry('${e.id}')">Delete</button></td>`;
+        tbody.appendChild(row);
+      });
+    }
+
+    function editEntry(id, date, type, account, amount, description) {
+      document.getElementById('entryId').value = id;
+      document.getElementById('entryDate').value = date;
+      document.getElementById('entryType').value = type;
+      document.getElementById('entryAccount').value = account;
+      document.getElementById('entryAmount').value = amount;
+      document.getElementById('entryDescription').value = description;
+    }
+
+    async function deleteEntry(id) {
+      if (!confirm('Delete this entry?')) return;
+      const { error } = await supabase.from('entries').delete().eq('id', id);
+      if (error) {
+        alert('Error deleting entry');
+        console.error(error);
+      } else {
+        alert('Entry deleted');
+        loadDashboard();
+        loadEntries();
+      }
+    }
+
+    async function loadMonthlySummary() {
+      const month = document.getElementById('summaryMonth').value;
+      if (!month) return alert('Select a month');
+
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) return console.error(error);
+
+      const filtered = data.filter(e => e.date.startsWith(month));
+      const grouped = {};
+
+      filtered.forEach(e => {
+        if (!grouped[e.date]) grouped[e.date] = { income: 0, expense: 0 };
+        if (e.type === 'Income') grouped[e.date].income += e.amount;
+        else grouped[e.date].expense += e.amount;
+      });
+
+      const tbody = document.querySelector('#summaryTable tbody');
+      tbody.innerHTML = '';
+
+      Object.keys(grouped).forEach(date => {
+        const g = grouped[date];
+        const net = g.income - g.expense;
+        const row = `<tr><td>${date}</td><td>${g.income.toFixed(3)}</td><td>${g.expense.toFixed(3)}</td><td>${net.toFixed(3)}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    }
+  </script>
 </body>
 </html>

@@ -72,6 +72,21 @@
     </table>
   </div>
 
+  <!-- Monthly Summary -->
+  <div id="summary-section" class="section hidden">
+    <h2>Monthly Summary</h2>
+    <label>Select Month: <input type="month" id="summaryMonth"></label>
+    <button onclick="loadMonthlySummary()">Load Summary</button>
+    <table id="summaryTable">
+      <thead>
+        <tr>
+          <th>Date</th><th>Income</th><th>Expense</th><th>Net</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
   <script>
     const supabase = window.supabase.createClient(
       'https://hdtbveombnhozbxognvr.supabase.co',
@@ -86,6 +101,7 @@
         document.getElementById('dashboard').classList.remove('hidden');
         document.getElementById('entry-form').classList.remove('hidden');
         document.getElementById('entries-section').classList.remove('hidden');
+        document.getElementById('summary-section').classList.remove('hidden');
         loadDashboard();
         loadEntries();
       } else {
@@ -202,6 +218,33 @@
         loadDashboard();
         loadEntries();
       }
+    }
+
+    async function loadMonthlySummary() {
+      const month = document.getElementById('summaryMonth').value;
+      if (!month) return alert('Select a month');
+
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) return console.error(error);
+
+      const filtered = data.filter(e => e.date.startsWith(month));
+      const grouped = {};
+
+      filtered.forEach(e => {
+        if (!grouped[e.date]) grouped[e.date] = { income: 0, expense: 0 };
+        if (e.type === 'Income') grouped[e.date].income += e.amount;
+        else grouped[e.date].expense += e.amount;
+      });
+
+      const tbody = document.querySelector('#summaryTable tbody');
+      tbody.innerHTML = '';
+
+      Object.keys(grouped).forEach(date => {
+        const g = grouped[date];
+        const net = g.income - g.expense;
+        const row = `<tr><td>${date}</td><td>${g.income.toFixed(3)}</td><td>${g.expense.toFixed(3)}</td><td>${net.toFixed(3)}</td></tr>`;
+        tbody.innerHTML += row;
+      });
     }
   </script>
 </body>

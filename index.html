@@ -39,8 +39,7 @@
 
   <!-- Entry Form -->
   <div id="entry-form" class="section hidden">
-    <h2>Add/Edit Entry</h2>
-    <input type="hidden" id="entryId">
+    <h2>Add Entry</h2>
     <label>Date: <input type="date" id="entryDate"></label><br>
     <label>Type:
       <select id="entryType">
@@ -84,7 +83,6 @@
     }
 
     function resetForm() {
-      document.getElementById('entryId').value = '';
       document.getElementById('entryDate').value = '';
       document.getElementById('entryType').value = 'Income';
       document.getElementById('entryAccount').value = 'Cash';

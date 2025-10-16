@@ -7,7 +7,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Al Hamala Cafeteria - Accounting Dashboard</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 <body class="bg-light">
 <div class="container py-4">
@@ -76,87 +76,36 @@
 </div>
 </div>
 </div>
-<script>
-    const supabase = supabase.createClient(
-      "https://hdtbveombnhozbxognvr.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM"
-    );
 
-    function login() {
-      const user = document.getElementById("username").value;
-      const pass = document.getElementById("password").value;
-      if (user === "admin" && pass === "admin") {
-        document.getElementById("loginSection").style.display = "none";
-        document.getElementById("dashboard").style.display = "block";
-        loadDashboard();
-      } else {
-        alert("Invalid credentials");
-      }
-    }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script><script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const supabase = window.supabase.createClient(
+            'https://hdtbveombnhozbxognvr.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM'
+        );
 
-    async function loadDashboard() {
-      const { data, error } = await supabase.from("entries").select("*");
-      if (error) return alert("Error loading data");
+        window.supabaseClient = supabase;
 
-      let income = 0, expense = 0, cashIE = 0, benefitIE = 0;
-      data.forEach(entry => {
-        const amt = parseFloat(entry.amount);
-        if (entry.type === "Income") income += amt;
-        else expense += amt;
+        // Reassign functions to use window.supabaseClient
+        window.loadDashboard = async function () {
+            const { data, error } = await window.supabaseClient.from('entries').select('*');
+            if (error) return alert("Error loading data");
+            console.log("Dashboard data:", data);
+        };
 
-        if (entry.account === "Cash") cashIE += amt;
-        else benefitIE += amt;
-      });
-
-      document.getElementById("totalIncome").textContent = income;
-      document.getElementById("totalExpense").textContent = expense;
-      document.getElementById("net").textContent = income - expense;
-      document.getElementById("cashIE").textContent = cashIE;
-      document.getElementById("benefitIE").textContent = benefitIE;
-    }
-
-    async function saveEntry() {
-      const entry = {
-        date: document.getElementById("entryDate").value,
-        type: document.getElementById("entryType").value,
-        account: document.getElementById("entryAccount").value,
-        amount: document.getElementById("entryAmount").value,
-        description: document.getElementById("entryDesc").value
-      };
-      const { error } = await supabase.from("entries").insert([entry]);
-      if (error) return alert("Error saving entry");
-      alert("Entry saved!");
-      loadDashboard();
-      resetForm();
-    }
-
-    function resetForm() {
-      document.getElementById("entryDate").value = "";
-      document.getElementById("entryType").value = "Income";
-      document.getElementById("entryAccount").value = "Cash";
-      document.getElementById("entryAmount").value = "";
-      document.getElementById("entryDesc").value = "";
-    }
-
-    function filterEntries() {
-      alert("Filtering not yet implemented.");
-    }
-
-    function exportData(format) {
-      alert(`Exporting as ${format} not yet implemented.`);
-    }
-
-    function importData() {
-      alert("Importing not yet implemented.");
-    }
-
-    function generateMonthlyReport() {
-      alert("Monthly report generation not yet implemented.");
-    }
-
-    function exportMonthlyCSV() {
-      alert("Monthly CSV export not yet implemented.");
-    }
-  </script>
-</body>
+        window.saveEntry = async function () {
+            const entry = {
+                date: document.getElementById("entryDate").value,
+                type: document.getElementById("entryType").value,
+                account: document.getElementById("entryAccount").value,
+                amount: document.getElementById("entryAmount").value,
+                description: document.getElementById("entryDesc").value
+            };
+            const { error } = await window.supabaseClient.from("entries").insert([entry]);
+            if (error) return alert("Error saving entry");
+            alert("Entry saved!");
+            window.loadDashboard();
+        };
+    });
+    </script></body>
 </html>

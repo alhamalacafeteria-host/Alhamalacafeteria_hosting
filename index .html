@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Al Hamala Cafeteria Accounting</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { padding: 20px; }
+    .dashboard-box { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .form-section { margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Al Hamala Cafeteria Accounting</h1>
+    <div id="login-section" class="form-section">
+      <h3>Login</h3>
+      <form id="login-form">
+        <div class="mb-3">
+          <label for="username" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password" required>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="rememberMe">
+          <label class="form-check-label" for="rememberMe">Remember Me</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="button" class="btn btn-secondary" id="logout-btn" style="display:none;">Logout</button>
+      </form>
+    </div>
+    <div id="dashboard" style="display:none;">
+      <div class="row">
+        <div class="col-md-4 dashboard-box">Total Income: <span id="total-income">0</span></div>
+        <div class="col-md-4 dashboard-box">Total Expense: <span id="total-expense">0</span></div>
+        <div class="col-md-4 dashboard-box">Net: <span id="net">0</span></div>
+        <div class="col-md-6 dashboard-box">Cash Income/Expense: <span id="cash-summary">0</span></div>
+        <div class="col-md-6 dashboard-box">Benefit Income/Expense: <span id="benefit-summary">0</span></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const supabase = supabase.createClient(
+      'https://hdtbveombnhozbxognvr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM'
+    );
+
+    async function updateDashboardTotals() {
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) {
+        console.error('Error fetching entries:', error);
+        return;
+      }
+      let totalIncome = 0;
+      let totalExpense = 0;
+      let cashSummary = 0;
+      let benefitSummary = 0;
+      data.forEach(entry => {
+        if (entry.type === 'Income') {
+          totalIncome += entry.amount;
+          if (entry.account === 'Cash') cashSummary += entry.amount;
+          else if (entry.account === 'Benefit') benefitSummary += entry.amount;
+        } else if (entry.type === 'Expense') {
+          totalExpense += entry.amount;
+          if (entry.account === 'Cash') cashSummary -= entry.amount;
+          else if (entry.account === 'Benefit') benefitSummary -= entry.amount;
+        }
+      });
+      const net = totalIncome - totalExpense;
+      document.getElementById('total-income').textContent = totalIncome.toFixed(2);
+      document.getElementById('total-expense').textContent = totalExpense.toFixed(2);
+      document.getElementById('net').textContent = net.toFixed(2);
+      document.getElementById('cash-summary').textContent = cashSummary.toFixed(2);
+      document.getElementById('benefit-summary').textContent = benefitSummary.toFixed(2);
+    }
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      if (username === 'admin' && password === 'admin') {
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('logout-btn').style.display = 'inline-block';
+        updateDashboardTotals();
+      } else {
+        alert('Invalid credentials');
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', function() {
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('logout-btn').style.display = 'none';
+    });
+  </script>
+</body>
+</html>

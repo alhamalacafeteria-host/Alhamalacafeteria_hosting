@@ -2,102 +2,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Al Hamala Cafeteria Accounting</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <style>
-    body { background-color: #f0f2f5; }
-    .container { margin-top: 30px; }
-    .card { margin-bottom: 20px; }
-    .nav-tabs .nav-link.active { background-color: #0d6efd; color: white; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Hamala Cafeteria Accounting</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1 class="text-center mb-4">Al Hamala Cafeteria Accounting</h1>
-
-    <!-- Tabs Navigation -->
-    <ul class="nav nav-tabs" id="accountingTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">Dashboard</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="entry-tab" data-bs-toggle="tab" data-bs-target="#entry" type="button" role="tab">Add Entry</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button" role="tab">Monthly Report</button>
-      </li>
-    </ul>
-
-    <div class="tab-content" id="accountingTabsContent">
-      <!-- Dashboard Tab -->
-      <div class="tab-pane fade show active card p-3" id="dashboard" role="tabpanel">
-        <h4>Dashboard</h4>
-        <div class="row text-center">
-          <div class="col-md-4">Total Income: <strong>$0</strong></div>
-          <div class="col-md-4">Total Expense: <strong>$0</strong></div>
-          <div class="col-md-4">Net: <strong>$0</strong></div>
+<div class="container mt-5">
+    <h2 class="text-center">Al Hamala Cafeteria Accounting</h2>
+    <div id="login-section">
+        <h4>Login</h4>
+        <input type="text" id="username" class="form-control" placeholder="Username">
+        <input type="password" id="password" class="form-control mt-2" placeholder="Password">
+        <div class="form-check mt-2">
+            <input class="form-check-input" type="checkbox" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">Remember Me</label>
         </div>
-      </div>
-
-      <!-- Entry Tab -->
-      <div class="tab-pane fade card p-3" id="entry" role="tabpanel">
-        <h4>Add/Edit Entry</h4>
-        <form>
-          <div class="mb-3">
-            <label for="entryDate" class="form-label">Date</label>
-            <input type="date" class="form-control" id="entryDate">
-          </div>
-          <div class="mb-3">
-            <label for="entryType" class="form-label">Type</label>
-            <select class="form-select" id="entryType">
-              <option>Income</option>
-              <option>Expense</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="entryAccount" class="form-label">Account</label>
-            <select class="form-select" id="entryAccount">
-              <option>Cash</option>
-              <option>Benefit</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="entryAmount" class="form-label">Amount</label>
-            <input type="number" class="form-control" id="entryAmount">
-          </div>
-          <div class="mb-3">
-            <label for="entryDesc" class="form-label">Description</label>
-            <input type="text" class="form-control" id="entryDesc">
-          </div>
-          <button type="submit" class="btn btn-success">Save</button>
-          <button type="reset" class="btn btn-secondary">Reset</button>
-        </form>
-      </div>
-
-      <!-- Monthly Report Tab -->
-      <div class="tab-pane fade card p-3" id="report" role="tabpanel">
-        <h4>Monthly Report</h4>
-        <input type="month" class="form-control mb-3" id="reportMonth">
-        <button class="btn btn-primary">Generate Report</button>
-        <table class="table mt-3">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Cash Income/Expense</th>
-              <th>Benefit Income/Expense</th>
-              <th>Daily Sale</th>
-              <th>Daily Net</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td colspan="5" class="text-center">No data available</td></tr>
-          </tbody>
-        </table>
-      </div>
+        <button class="btn btn-primary mt-2" onclick="login()">Login</button>
     </div>
-  </div>
+
+    <div id="dashboard" style="display:none;">
+        <button class="btn btn-danger float-end" onclick="logout()">Logout</button>
+        <h4>Dashboard</h4>
+        <div class="row">
+            <div class="col">Total Income: <span id="totalIncome">0</span></div>
+            <div class="col">Total Expense: <span id="totalExpense">0</span></div>
+            <div class="col">Net: <span id="net">0</span></div>
+            <div class="col">Cash Income/Expense: <span id="cash">0</span></div>
+            <div class="col">Benefit Income/Expense: <span id="benefit">0</span></div>
+        </div>
+
+        <h4 class="mt-4">Add/Edit Entry</h4>
+        <input type="date" id="entryDate" class="form-control">
+        <select id="entryType" class="form-control mt-2">
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+        </select>
+        <select id="entryAccount" class="form-control mt-2">
+            <option value="Cash">Cash</option>
+            <option value="Benefit">Benefit</option>
+        </select>
+        <input type="number" id="entryAmount" class="form-control mt-2" placeholder="Amount">
+        <input type="text" id="entryDescription" class="form-control mt-2" placeholder="Description">
+        <button class="btn btn-success mt-2" onclick="saveEntry()">Save</button>
+        <button class="btn btn-secondary mt-2" onclick="resetForm()">Reset</button>
+
+        <h4 class="mt-4">Filter & Export</h4>
+        <input type="date" id="filterStart" class="form-control">
+        <input type="date" id="filterEnd" class="form-control mt-2">
+        <select id="filterType" class="form-control mt-2">
+            <option value="All">All</option>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+        </select>
+        <select id="filterAccount" class="form-control mt-2">
+            <option value="All">All</option>
+            <option value="Cash">Cash</option>
+            <option value="Benefit">Benefit</option>
+        </select>
+        <button class="btn btn-info mt-2" onclick="applyFilter()">Apply</button>
+        <button class="btn btn-warning mt-2" onclick="clearFilter()">Clear</button>
+        <button class="btn btn-outline-primary mt-2" onclick="exportData('json')">Export JSON</button>
+        <button class="btn btn-outline-success mt-2" onclick="exportData('csv')">Export CSV</button>
+        <button class="btn btn-outline-dark mt-2" onclick="exportData('excel')">Export Excel</button>
+        <input type="file" id="importFile" class="form-control mt-2" onchange="importData()">
+
+        <h4 class="mt-4">Monthly Report</h4>
+        <input type="month" id="reportMonth" class="form-control">
+        <button class="btn btn-primary mt-2" onclick="generateReport()">Generate</button>
+        <button class="btn btn-outline-success mt-2" onclick="exportReportCSV()">Export CSV</button>
+        <table class="table mt-2">
+            <thead>
+                <tr><th>Date</th><th>Cash Income/Expense</th><th>Benefit Income/Expense</th><th>Daily Sale</th><th>Daily Net</th></tr>
+            </thead>
+            <tbody id="reportTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const supabase = supabase.createClient("https://hdtbveombnhozbxognvr.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM");
+
+function login() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    if (user === 'admin' && pass === 'admin') {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        loadDashboard();
+    } else {
+        Swal.fire('Error', 'Invalid credentials', 'error');
+    }
+}
+
+function logout() {
+    document.getElementById('login-section').style.display = 'block';
+    document.getElementById('dashboard').style.display = 'none';
+}
+
+function resetForm() {
+    document.getElementById('entryDate').value = '';
+    document.getElementById('entryType').value = 'Income';
+    document.getElementById('entryAccount').value = 'Cash';
+    document.getElementById('entryAmount').value = '';
+    document.getElementById('entryDescription').value = '';
+}
+
+function saveEntry() {
+    const entry = {
+        date: document.getElementById('entryDate').value,
+        type: document.getElementById('entryType').value,
+        account: document.getElementById('entryAccount').value,
+        amount: parseFloat(document.getElementById('entryAmount').value),
+        description: document.getElementById('entryDescription').value
+    };
+    supabase.from('entries').insert([entry]).then(() => {
+        Swal.fire('Saved', 'Entry saved successfully', 'success');
+        resetForm();
+        loadDashboard();
+    });
+}
+
+function loadDashboard() {
+    supabase.from('entries').select('*').then(({ data }) => {
+        let income = 0, expense = 0, cash = 0, benefit = 0;
+        data.forEach(e => {
+            if (e.type === 'Income') income += e.amount;
+            else expense += e.amount;
+            if (e.account === 'Cash') cash += e.amount;
+            else benefit += e.amount;
+        });
+        document.getElementById('totalIncome').innerText = income;
+        document.getElementById('totalExpense').innerText = expense;
+        document.getElementById('net').innerText = income - expense;
+        document.getElementById('cash').innerText = cash;
+        document.getElementById('benefit').innerText = benefit;
+    });
+}
+</script>
 </body>
 </html>

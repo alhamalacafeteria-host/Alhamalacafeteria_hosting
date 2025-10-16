@@ -3,59 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Hamala Cafeteria Accounting</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .hidden { display: none; }
-    .dashboard, .entry-form, .report-section { margin-top: 20px; }
-    label, input, select, button { display: block; margin: 5px 0; }
-  </style>
-</head>
-<body>
-  <h1>Al Hamala Cafeteria Accounting</h1>
-
-  <div id="login-section">
-    <label>Username: <input type="text" id="username"></label>
-    <label>Password: <input type="password" id="password"></label>
-    <label><input type="checkbox" id="remember"> Remember Me</label>
-    <button onclick="login()">Login</button>
-  </div>
-
-  <div id="main-section" class="hidden">
-    <button onclick="logout()">Logout</button>
-
-    <div class="dashboard">
-      <h2>Dashboard</h2>
-      <p>Total Income: <span id="total-income">0</span></p>
-      <p>Total Expense: <span id="total-expense">0</span></p>
-      <p>Net: <span id="net">0</span></p>
-      <p>Cash: <span id="cash">0</span></p>
-      <p>Benefit: <span id="benefit">0</span></p>
-    </div>
-
-    <div class="entry-form">
-      <h2>Add Entry</h2>
-      <label>Date: <input type="date" id="entry-date"></label>
-      <label>Type:
-        <select id="entry-type">
-          <option>Income</option>
-          <option>Expense</option>
-        </select>
-      </label>
-      <label>Account:
-        <select id="entry-account">
-          <option>Cash</option>
-          <option>Benefit</option>
-        </select>
-      </label>
-      <label>Amount: <input type="number" id="entry-amount"></label>
-      <label>Description: <input type="text" id="entry-description"></label>
-      <button onclick="saveEntry()">Save</button>
-      <button onclick="resetForm()">Reset</button>
-    </div>
-  </div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
@@ -63,32 +11,40 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM';
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    window.supabase = supabase;
-
-    function login() {
-      const user = document.getElementById('username').value;
-      const pass = document.getElementById('password').value;
-      if (user === 'admin' && pass === 'admin') {
-        document.getElementById('login-section').classList.add('hidden');
-        document.getElementById('main-section').classList.remove('hidden');
+    document.getElementById('loginBtn').onclick = async () => {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      if (username === 'admin' && password === 'admin') {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboardSection').style.display = 'block';
         loadDashboard();
       } else {
         alert('Invalid credentials');
       }
-    }
+    };
 
-    function logout() {
-      document.getElementById('login-section').classList.remove('hidden');
-      document.getElementById('main-section').classList.add('hidden');
-    }
+    document.getElementById('saveBtn').onclick = async () => {
+      const entry = {
+        date: document.getElementById('date').value,
+        type: document.getElementById('type').value,
+        account: document.getElementById('account').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        description: document.getElementById('description').value
+      };
+      const { error } = await supabase.from('entries').insert([entry]);
+      if (error) {
+        console.error('Insert error:', error);
+      } else {
+        loadDashboard();
+      }
+    };
 
     async function loadDashboard() {
       const { data, error } = await supabase.from('entries').select('*');
       if (error) {
-        console.error('Error loading dashboard:', error);
+        console.error('Dashboard load error:', error);
         return;
       }
-
       let income = 0, expense = 0, cash = 0, benefit = 0;
       data.forEach(entry => {
         if (entry.type === 'Income') income += entry.amount;
@@ -96,41 +52,43 @@
         if (entry.account === 'Cash') cash += entry.amount;
         if (entry.account === 'Benefit') benefit += entry.amount;
       });
-
-      document.getElementById('total-income').textContent = income;
-      document.getElementById('total-expense').textContent = expense;
-      document.getElementById('net').textContent = income - expense;
-      document.getElementById('cash').textContent = cash;
-      document.getElementById('benefit').textContent = benefit;
-    }
-
-    async function saveEntry() {
-      const entry = {
-        date: document.getElementById('entry-date').value,
-        type: document.getElementById('entry-type').value,
-        account: document.getElementById('entry-account').value,
-        amount: parseFloat(document.getElementById('entry-amount').value),
-        description: document.getElementById('entry-description').value
-      };
-
-      const { error } = await supabase.from('entries').insert([entry]);
-      if (error) {
-        console.error('Error saving entry:', error);
-        alert('Failed to save entry');
-      } else {
-        alert('Entry saved');
-        resetForm();
-        loadDashboard();
-      }
-    }
-
-    function resetForm() {
-      document.getElementById('entry-date').value = '';
-      document.getElementById('entry-type').value = 'Income';
-      document.getElementById('entry-account').value = 'Cash';
-      document.getElementById('entry-amount').value = '';
-      document.getElementById('entry-description').value = '';
+      document.getElementById('totalIncome').textContent = income.toFixed(2);
+      document.getElementById('totalExpense').textContent = expense.toFixed(2);
+      document.getElementById('net').textContent = (income - expense).toFixed(2);
+      document.getElementById('cash').textContent = cash.toFixed(2);
+      document.getElementById('benefit').textContent = benefit.toFixed(2);
     }
   </script>
+</head>
+<body>
+  <div id="loginSection">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+  </div>
+
+  <div id="dashboardSection" style="display:none">
+    <h2>Dashboard</h2>
+    <p>Total Income: <span id="totalIncome">0</span></p>
+    <p>Total Expense: <span id="totalExpense">0</span></p>
+    <p>Net: <span id="net">0</span></p>
+    <p>Cash: <span id="cash">0</span></p>
+    <p>Benefit: <span id="benefit">0</span></p>
+
+    <h3>Add Entry</h3>
+    <input type="date" id="date">
+    <select id="type">
+      <option>Income</option>
+      <option>Expense</option>
+    </select>
+    <select id="account">
+      <option>Cash</option>
+      <option>Benefit</option>
+    </select>
+    <input type="number" id="amount" placeholder="Amount">
+    <input type="text" id="description" placeholder="Description">
+    <button id="saveBtn">Save</button>
+  </div>
 </body>
 </html>

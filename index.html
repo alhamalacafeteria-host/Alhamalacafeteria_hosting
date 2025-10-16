@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Al Hamala Cafeteria Accounting</title>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -16,12 +17,32 @@
       const password = document.getElementById('password').value;
       if (username === 'admin' && password === 'admin') {
         document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('dashboardSection').style.display = 'block';
+        document.getElementById('mainSection').style.display = 'block';
         loadDashboard();
       } else {
         alert('Invalid credentials');
       }
     };
+
+    async function loadDashboard() {
+      const { data, error } = await supabase.from('entries').select('*');
+      if (error) {
+        console.error('Error loading dashboard:', error);
+        return;
+      }
+      let income = 0, expense = 0, cash = 0, benefit = 0;
+      data.forEach(entry => {
+        if (entry.type === 'Income') income += entry.amount;
+        if (entry.type === 'Expense') expense += entry.amount;
+        if (entry.account === 'Cash') cash += entry.amount;
+        if (entry.account === 'Benefit') benefit += entry.amount;
+      });
+      document.getElementById('totalIncome').innerText = income;
+      document.getElementById('totalExpense').innerText = expense;
+      document.getElementById('net').innerText = income - expense;
+      document.getElementById('cash').innerText = cash;
+      document.getElementById('benefit').innerText = benefit;
+    }
 
     document.getElementById('saveBtn').onclick = async () => {
       const entry = {
@@ -33,31 +54,13 @@
       };
       const { error } = await supabase.from('entries').insert([entry]);
       if (error) {
-        console.error('Insert error:', error);
+        alert('Error saving entry');
+        console.error(error);
       } else {
+        alert('Entry saved');
         loadDashboard();
       }
     };
-
-    async function loadDashboard() {
-      const { data, error } = await supabase.from('entries').select('*');
-      if (error) {
-        console.error('Dashboard load error:', error);
-        return;
-      }
-      let income = 0, expense = 0, cash = 0, benefit = 0;
-      data.forEach(entry => {
-        if (entry.type === 'Income') income += entry.amount;
-        if (entry.type === 'Expense') expense += entry.amount;
-        if (entry.account === 'Cash') cash += entry.amount;
-        if (entry.account === 'Benefit') benefit += entry.amount;
-      });
-      document.getElementById('totalIncome').textContent = income.toFixed(2);
-      document.getElementById('totalExpense').textContent = expense.toFixed(2);
-      document.getElementById('net').textContent = (income - expense).toFixed(2);
-      document.getElementById('cash').textContent = cash.toFixed(2);
-      document.getElementById('benefit').textContent = benefit.toFixed(2);
-    }
   </script>
 </head>
 <body>
@@ -68,13 +71,13 @@
     <button id="loginBtn">Login</button>
   </div>
 
-  <div id="dashboardSection" style="display:none">
+  <div id="mainSection" style="display:none">
     <h2>Dashboard</h2>
     <p>Total Income: <span id="totalIncome">0</span></p>
     <p>Total Expense: <span id="totalExpense">0</span></p>
     <p>Net: <span id="net">0</span></p>
-    <p>Cash: <span id="cash">0</span></p>
-    <p>Benefit: <span id="benefit">0</span></p>
+    <p>Cash Income/Expense: <span id="cash">0</span></p>
+    <p>Benefit Income/Expense: <span id="benefit">0</span></p>
 
     <h3>Add Entry</h3>
     <input type="date" id="date">
@@ -89,6 +92,7 @@
     <input type="number" id="amount" placeholder="Amount">
     <input type="text" id="description" placeholder="Description">
     <button id="saveBtn">Save</button>
+    <button onclick="document.getElementById('date').value='';document.getElementById('type').value='Income';document.getElementById('account').value='Cash';document.getElementById('amount').value='';document.getElementById('description').value='';">Reset</button>
   </div>
 </body>
 </html>

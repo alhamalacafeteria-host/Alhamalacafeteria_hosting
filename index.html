@@ -1,86 +1,88 @@
 
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Al Hamala Cafeteria - Accounting Dashboard</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script></head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Al Hamala Cafeteria - Accounting Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 <body class="bg-light">
-<div class="container py-4">
-<h2 class="text-center mb-4">Al Hamala Cafeteria - Accounting Dashboard</h2>
-<!-- Login -->
-<div class="card p-4 mb-4" id="loginSection">
-<h4>Login</h4>
-<input class="form-control mb-2" id="username" placeholder="Username" type="text"/>
-<input class="form-control mb-2" id="password" placeholder="Password" type="password"/>
-<button class="btn btn-primary" onclick="login()">Login</button>
-</div>
-<!-- Dashboard -->
-<div id="dashboard" style="display:none;">
-<div class="row text-center mb-4">
-<div class="col"><h5>Total Income: <span id="totalIncome">0</span></h5></div>
-<div class="col"><h5>Total Expense: <span id="totalExpense">0</span></h5></div>
-<div class="col"><h5>Net: <span id="net">0</span></h5></div>
-<div class="col"><h5>Cash I/E: <span id="cashIE">0</span></h5></div>
-<div class="col"><h5>Benefit I/E: <span id="benefitIE">0</span></h5></div>
-</div>
-<!-- Entry Form -->
-<div class="card p-4 mb-4">
-<h4>Add/Edit Entry</h4>
-<input class="form-control mb-2" id="entryDate" type="date"/>
-<select class="form-control mb-2" id="entryType">
-<option value="Income">Income</option>
-<option value="Expense">Expense</option>
-</select>
-<select class="form-control mb-2" id="entryAccount">
-<option value="Cash">Cash</option>
-<option value="Benefit">Benefit</option>
-</select>
-<input class="form-control mb-2" id="entryAmount" placeholder="Amount" type="number"/>
-<input class="form-control mb-2" id="entryDesc" placeholder="Description" type="text"/>
-<button class="btn btn-success" onclick="saveEntry()">Save</button>
-<button class="btn btn-secondary" onclick="resetForm()">Reset</button>
-</div>
-<!-- Filter & Export -->
-<div class="card p-4 mb-4">
-<h4>Filter &amp; Export</h4>
-<input class="form-control mb-2" id="filterStart" type="date"/>
-<input class="form-control mb-2" id="filterEnd" type="date"/>
-<select class="form-control mb-2" id="filterType">
-<option value="">All Types</option>
-<option value="Income">Income</option>
-<option value="Expense">Expense</option>
-</select>
-<select class="form-control mb-2" id="filterAccount">
-<option value="">All Accounts</option>
-<option value="Cash">Cash</option>
-<option value="Benefit">Benefit</option>
-</select>
-<button class="btn btn-info mb-2" onclick="filterEntries()">Apply Filter</button>
-<button class="btn btn-outline-primary" onclick="exportData('json')">Export JSON</button>
-<button class="btn btn-outline-success" onclick="exportData('csv')">Export CSV</button>
-<button class="btn btn-outline-warning" onclick="exportData('excel')">Export Excel</button>
-<input class="form-control mt-2" id="importFile" onchange="importData()" type="file"/>
-</div>
-<!-- Monthly Report -->
-<div class="card p-4 mb-4">
-<h4>Monthly Report</h4>
-<input class="form-control mb-2" id="reportMonth" type="month"/>
-<button class="btn btn-dark" onclick="generateMonthlyReport()">Generate Report</button>
-<button class="btn btn-outline-dark" onclick="exportMonthlyCSV()">Export CSV</button>
-<div class="mt-3" id="monthlyReport"></div>
-</div>
-</div>
-</div>
-<script>
-    const supabase = supabase.createClient(
-      "https://hdtbveombnhozbxognvr.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM"
-    );
+  <div class="container py-4">
+    <h2 class="text-center mb-4">Al Hamala Cafeteria - Accounting Dashboard</h2>
+
+    <!-- Login -->
+    <div id="loginSection" class="card p-4 mb-4">
+      <h4>Login</h4>
+      <input type="text" id="username" class="form-control mb-2" placeholder="Username" />
+      <input type="password" id="password" class="form-control mb-2" placeholder="Password" />
+      <button class="btn btn-primary" onclick="login()">Login</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" style="display:none;">
+      <div class="row text-center mb-4">
+        <div class="col"><h5>Total Income: <span id="totalIncome">0</span></h5></div>
+        <div class="col"><h5>Total Expense: <span id="totalExpense">0</span></h5></div>
+        <div class="col"><h5>Net: <span id="net">0</span></h5></div>
+        <div class="col"><h5>Cash I/E: <span id="cashIE">0</span></h5></div>
+        <div class="col"><h5>Benefit I/E: <span id="benefitIE">0</span></h5></div>
+      </div>
+
+      <!-- Entry Form -->
+      <div class="card p-4 mb-4">
+        <h4>Add/Edit Entry</h4>
+        <input type="date" id="entryDate" class="form-control mb-2" />
+        <select id="entryType" class="form-control mb-2">
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+        <select id="entryAccount" class="form-control mb-2">
+          <option value="Cash">Cash</option>
+          <option value="Benefit">Benefit</option>
+        </select>
+        <input type="number" id="entryAmount" class="form-control mb-2" placeholder="Amount" />
+        <input type="text" id="entryDesc" class="form-control mb-2" placeholder="Description" />
+        <button class="btn btn-success" onclick="saveEntry()">Save</button>
+        <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+      </div>
+
+      <!-- Filter & Export -->
+      <div class="card p-4 mb-4">
+        <h4>Filter & Export</h4>
+        <input type="date" id="filterStart" class="form-control mb-2" />
+        <input type="date" id="filterEnd" class="form-control mb-2" />
+        <select id="filterType" class="form-control mb-2">
+          <option value="">All Types</option>
+          <option value="Income">Income</option>
+          <option value="Expense">Expense</option>
+        </select>
+        <select id="filterAccount" class="form-control mb-2">
+          <option value="">All Accounts</option>
+          <option value="Cash">Cash</option>
+          <option value="Benefit">Benefit</option>
+        </select>
+        <button class="btn btn-info mb-2" onclick="filterEntries()">Apply Filter</button>
+        <button class="btn btn-outline-primary" onclick="exportData('json')">Export JSON</button>
+        <button class="btn btn-outline-success" onclick="exportData('csv')">Export CSV</button>
+        <button class="btn btn-outline-warning" onclick="exportData('excel')">Export Excel</button>
+        <input type="file" id="importFile" class="form-control mt-2" onchange="importData()" />
+      </div>
+
+      <!-- Monthly Report -->
+      <div class="card p-4 mb-4">
+        <h4>Monthly Report</h4>
+        <input type="month" id="reportMonth" class="form-control mb-2" />
+        <button class="btn btn-dark" onclick="generateMonthlyReport()">Generate Report</button>
+        <button class="btn btn-outline-dark" onclick="exportMonthlyCSV()">Export CSV</button>
+        <div id="monthlyReport" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    
 
     function login() {
       const user = document.getElementById("username").value;
@@ -158,72 +160,13 @@
       alert("Monthly CSV export not yet implemented.");
     }
   </script>
+
 <script>
   const supabase = supabase.createClient(
-    "https://hdtbveombnhozbxognvr.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM"
+    'https://hdtbveombnhozbxognvr.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM'
   );
+</script>
 
-  async function loadDashboard() {
-    const { data, error } = await supabase.from("entries").select("*");
-    if (error) {
-      console.error("Error loading data:", error);
-      return;
-    }
-
-    let income = 0, expense = 0, cashIE = 0, benefitIE = 0;
-    data.forEach(entry => {
-      const amt = parseFloat(entry.amount);
-      if (entry.type === "Income") income += amt;
-      else expense += amt;
-
-      if (entry.account === "Cash") cashIE += amt;
-      else benefitIE += amt;
-    });
-
-    document.getElementById("totalIncome").textContent = income;
-    document.getElementById("totalExpense").textContent = expense;
-    document.getElementById("net").textContent = income - expense;
-    document.getElementById("cashIE").textContent = cashIE;
-    document.getElementById("benefitIE").textContent = benefitIE;
-  }
-
-  async function saveEntry() {
-    const entry = {
-      date: document.getElementById("entryDate").value,
-      type: document.getElementById("entryType").value,
-      account: document.getElementById("entryAccount").value,
-      amount: document.getElementById("entryAmount").value,
-      description: document.getElementById("entryDesc").value
-    };
-    const { error } = await supabase.from("entries").insert([entry]);
-    if (error) {
-      console.error("Error saving entry:", error);
-      return;
-    }
-    alert("Entry saved!");
-    loadDashboard();
-    resetForm();
-  }
-
-  function resetForm() {
-    document.getElementById("entryDate").value = "";
-    document.getElementById("entryType").value = "Income";
-    document.getElementById("entryAccount").value = "Cash";
-    document.getElementById("entryAmount").value = "";
-    document.getElementById("entryDesc").value = "";
-  }
-
-  function login() {
-    const user = document.getElementById("username").value;
-    const pass = document.getElementById("password").value;
-    if (user === "admin" && pass === "admin") {
-      document.getElementById("loginSection").style.display = "none";
-      document.getElementById("dashboard").style.display = "block";
-      loadDashboard();
-    } else {
-      alert("Invalid credentials");
-    }
-  }
-</script></body>
+</body>
 </html>

@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Restaurant Accounts Manager</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3
+  <!-- ✅ Bootstrap CSS -->
+  https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
   <style>
     body {
       background: #f8f9fa;
@@ -119,10 +120,9 @@
     </tbody>
   </table>
 
-  <!-- Supabase JS -->
-  https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
-  <script>
-    // ✅ Initialize Supabase AFTER the library is loaded
+  <!-- ✅ Load Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+// ✅ Initialize Supabase AFTER the library is loaded
     const supabaseUrl = "https://hdtbveombnhozbxognvr.supabase.co";
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM";
     const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);

@@ -1,294 +1,214 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Restaurant Accounts Manager</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Restaurant Accounts Manager</title>
+  https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
+  <style>
     body {
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        margin: 0;
-        background: #f4f6f8;
-        color: #333;
+      background: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
     }
-    header {
- background: #2c3e50;
-        color: #fff;
-        padding: 15px;
-        text-align: center;
-        font-size: 1.5em;
+    .dashboard-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
     }
-    .container {
-        max-width: 1200px;
-        margin: auto;
-        padding: 20px;
+    .dashboard-card h4 {
+      margin-bottom: 10px;
     }
-    .dashboard {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 20px;
+    .section-title {
+      margin: 30px 0 15px;
+      font-weight: bold;
+      color: #343a40;
     }
-    .card {
-        flex: 1;
-        background: #fff;
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        text-align: center;
+    .btn-custom {
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 6px;
     }
-    .3 {
-        margin-bottom: 10px;
-        color: #555;
-    }
-    .card p {
-        font-size: 1.4em;
-        font-weight: bold;
-    }
-    form {
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    form input, form select, form textarea, form button {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
-    form button {
-        background: #3498db;
-        color: #fff;
-        border: none;
-        cursor: pointer;
-    }
-    form button:hover {
-        background: #2980b9;
+    .btn-custom:hover {
+      background-color: #0056b3;
     }
     table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
     }
-    table th, table td {
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
-        text-align: center;
+    th {
+      background: #007bff;
+      color: #fff;
     }
-    .actions button {
-        margin: 0 5px;
-        padding: 5px 10px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    .edit-btn { background: #f39c12; color: #fff; }
-    .delete-btn { background: #e74c3c; color: #fff; }
-    .filter-section, .report-section {
-        background: #fff;
-        padding: 15px;
-        border-radius: 8px;
-        margin-top: 20px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .btn-export {
-        background: #27ae60;
-        color: #fff;
-        padding: 8px 12px;
-        border-radius: 5px;
-        border: none;
-        cursor: pointer;
-        margin: 5px;
-    }
-    .btn-export:hover {
-        background: #1e8449;
-    }
-</style>
+  </style>
 </head>
-<body>
-<header>Restaurant Accounts Manager</header>
-<div class="container">
+<body class="container py-4">
 
-    <!-- Dashboard -->
-    <div class="dashboard">
-        <div class="card">
-            <h3>Total Income</h3>
-            <p id="total-income">$0</p>
-        </div>
-        <div class="card">
-            <h3>Total Expense</h3>
-            <p id="total-expense">$0</p>
-        </div>
-        <div class="card">
-            <h3>Net</h3>
-            <p id="net">$0</p>
-        </div>
+  <!-- Dashboard -->
+  <h2 class="text-center mb-4">Restaurant Accounts Manager</h2>
+  <div class="row text-center mb-4">
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h4>Total Income</h4>
+        <p id="totalIncome">0</p>
+      </div>
     </div>
-
-    <!-- Add/Edit Entry -->
-    <form id="entry-form">
-        <h2>Add / Edit Entry</h2>
-        <input type="date" id="date" required>
-        <select id="type" required>
-            <option value="">Select Type</option>
-            <option value="Income">Income</option>
-            <option value="Expense">Expense</option>
-        </select>
-        <select id="account" required>
-            <option value="">Select Account</option>
-            <option value="Cash">Cash</option>
-            <option value="Benefit">Benefit</option>
-        </select>
-        <input type="number" id="amount" placeholder="Amount" required>
-        <textarea id="description" placeholder="Description"></textarea>
-        <button type="submit">Save</button>
-        <button type="reset">Reset</button>
-    </form>
-
-    <!-- Entries Table -->
-    <div>
-        <h2>Entries</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Account</th>
-                    <th>Amount</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="entries-table">
-                <tr><td colspan="6">No entries yet</td></tr>
-            </tbody>
-        </table>
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h4>Total Expense</h4>
+        <p id="totalExpense">0</p>
+      </div>
     </div>
-
-    <!-- Filter & Export -->
-    <div class="filter-section">
-        <h3>Filter & Export</h3>
-        <input type="date" id="filter-start">
-        <input type="date" id="filter-end">
-        <select id="filter-type">
-            <option value="">Type</option>
-            <option value="Income">Income</option>
-            <option value="Expense">Expense</option>
-        </select>
-        <select id="filter-account">
-            <option value="">Account</option>
-            <option value="Cash">Cash</option>
-            <option value="Benefit">Benefit</option>
-        </select>
-        <button class="btn-export" onclick="exportData('csv')">Export CSV</button>
-        <button class="btn-export" onclick="exportData('json')">Export JSON</button>
-        <button class="btn-export" onclick="exportData('excel')">Export Excel</button>
-        <input type="file" id="import-json" accept=".json">
+    <div class="col-md-4">
+      <div class="dashboard-card">
+        <h4>Net</h4>
+        <p id="netAmount">0</p>
+      </div>
     </div>
+  </div>
 
-    <!-- Monthly Report -->
-    <div class="report-section">
-        <h3>Monthly Report</h3>
-        <button class="btn-export" onclick="generateMonthlyReport()">Generate Report</button>
-        <button class="btn-export" onclick="exportMonthlyCSV()">Export CSV</button>
+  <!-- Add/Edit Entry -->
+  <h3 class="section-title">Add / Edit Entry</h3>
+  <form id="entryForm" class="row g-3 mb-4">
+    <div class="col-md-3">
+      <input type="date" class="form-control" id="date" required>
     </div>
+    <div class="col-md-2">
+      <select class="form-select" id="type" required>
+        <option value="">Type</option>
+        <option value="Income">Income</option>
+        <option value="Expense">Expense</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select class="form-select" id="account" required>
+        <option value="">Account</option>
+        <option value="Cash">Cash</option>
+        <option value="Benefit">Benefit</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <input type="number" class="form-control" id="amount" placeholder="Amount" required>
+    </div>
+    <div class="col-md-3">
+      <input type="text" class="form-control" id="description" placeholder="Description">
+    </div>
+    <div class="col-12 text-end">
+      <button type="submit" class="btn btn-custom">Save</button>
+      <button type="reset" class="btn btn-secondary">Reset</button>
+    </div>
+  </form>
 
-</div>
+  <!-- Entries Table -->
+  <h3 class="section-title">Entries</h3>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Account</th>
+        <th>Amount</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="entriesTable">
+      <tr><td colspan="6" class="text-center">No entries yet</td></tr>
+    </tbody>
+  </table>
 
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2</script>
-<script>
+  <!-- Supabase JS -->
+  https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2</script>
+  <script>
+    // ✅ Initialize Supabase
     const supabaseUrl = "https://hdtbveombnhozbxognvr.supabase.co";
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM";
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const tableBody = document.getElementById('entries-table');
-    const form = document.getElementById('entry-form');
+    // ✅ Add Entry
+    document.getElementById('entryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const date = document.getElementById('date').value;
+      const type = document.getElementById('type').value;
+      const account = document.getElementById('account').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const description = document.getElementById('description').value;
 
-    async function loadEntries() {
-        const { data, error } = await supabase.from('entries').select('*').order('date', { ascending: true });
-        if (error) {
-            console.error(error);
-            return;
-        }
-        renderEntries(data);
-        updateDashboard(data);
-    }
+      const { data, error } = await supabaseClient
+        .from('entries')
+        .insert([{ date, type, account, amount, description }]);
 
-    function renderEntries(entries) {
-        tableBody.innerHTML = '';
-        if (entries.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6">No entries yet</td></tr>';
-            return;
-        }
-        entries.forEach(entry => {
-            const row = `<tr>
-                <td>${entry.date}</td>
-                <td>${entry.type}</td>
-                <td>${entry.account}</td>
-                <td>$${entry.amount}</td>
-                <td>${entry.description || ''}</td>
-                <td class="actions">
-                    <button class="edit-btn" onclick="editEntry(${entry.id})">Edit</button>
-                    <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
-                </td>
-            </tr>`;
-            tableBody.innerHTML += row;
-        });
-    }
-
-    function updateDashboard(entries) {
-        let income = 0, expense = 0;
-        entries.forEach(e => {
-            if (e.type === 'Income') income += e.amount;
-            else expense += e.amount;
-        });
-        document.getElementById('total-income').textContent = `$${income}`;
-        document.getElementById('total-expense').textContent = `$${expense}`;
-        document.getElementById('net').textContent = `$${income - expense}`;
-    }
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newEntry = {
-            date: document.getElementById('date').value,
-            type: document.getElementById('type').value,
-            account: document.getElementById('account').value,
-            amount: parseFloat(document.getElementById('amount').value),
-            description: document.getElementById('description').value
-        };
-        const { error } = await supabase.from('entries').insert([newEntry]);
-        if (error) {
-            console.error(error);
-            return;
-        }
-        form.reset();
+      if (error) {
+        alert('Error adding entry: ' + error.message);
+      } else {
+        alert('Entry added successfully!');
         loadEntries();
+      }
     });
 
+    // ✅ Load Entries
+    async function loadEntries() {
+      const { data, error } = await supabaseClient
+        .from('entries')
+        .select('*')
+        .order('date', { ascending: false });
+
+      const tableBody = document.getElementById('entriesTable');
+      tableBody.innerHTML = '';
+
+      if (error) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Error loading entries</td></tr>';
+        return;
+      }
+
+      if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No entries yet</td></tr>';
+        return;
+      }
+
+      let totalIncome = 0, totalExpense = 0;
+
+      data.forEach(entry => {
+        if (entry.type === 'Income') totalIncome += entry.amount;
+        else totalExpense += entry.amount;
+
+        const row = `
+          <tr>
+            <td>${entry.date}</td>
+            <td>${entry.type}</td>
+            <td>${entry.account}</td>
+            <td>${entry.amount}</td>
+            <td>${entry.description || ''}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="deleteEntry(${entry.id})">Delete</button></td>
+          </tr>
+        `;
+        tableBody.innerHTML += row;
+      });
+
+      document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
+      document.getElementById('totalExpense').textContent = totalExpense.toFixed(2);
+      document.getElementById('netAmount').textContent = (totalIncome - totalExpense).toFixed(2);
+    }
+
+    // ✅ Delete Entry
     async function deleteEntry(id) {
-        await supabase.from('entries').delete().eq('id', id);
+      const { error } = await supabaseClient
+        .from('entries')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('Error deleting entry: ' + error.message);
+      } else {
+        alert('Entry deleted successfully!');
         loadEntries();
+      }
     }
 
-    function editEntry(id) {
-        alert('Edit functionality can be implemented here.');
-    }
-
-    function exportData(format) {
-        alert(`Export as ${format} coming soon!`);
-    }
-
-    function generateMonthlyReport() {
-        alert('Monthly report generation coming soon!');
-    }
-
-    function exportMonthlyCSV() {
-        alert('Export monthly CSV coming soon!');
-    }
-
+    // Load entries on page load
     loadEntries();
-</script>
+  </script>
 </body>
 </html>

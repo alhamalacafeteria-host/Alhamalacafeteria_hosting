@@ -1,214 +1,464 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Restaurant Accounts Manager</title>
-  <!-- ✅ Bootstrap CSS -->
-  https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Restaurant Accounts (Supabase)</title>
   <style>
-    body {
-      background: #f8f9fa;
-      font-family: 'Segoe UI', sans-serif;
-    }
-    .dashboard-card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .dashboard-card h4 {
-      margin-bottom: 10px;
-    }
-    .section-title {
-      margin: 30px 0 15px;
-      font-weight: bold;
-      color: #343a40;
-    }
-    .btn-custom {
-      background-color: #007bff;
-      color: #fff;
-      border-radius: 6px;
-    }
-    .btn-custom:hover {
-      background-color: #0056b3;
-    }
-    table {
-      background: #fff;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th {
-      background: #007bff;
-      color: #fff;
-    }
+    *{box-sizing:border-box}
+    :root{ --bg:#0b1416; --card:#0f1f23; --muted:#94a3b8; --text:#e2e8f0; --accent:#0f766e; --danger:#ef4444; --ok:#22c55e }
+    html,body{margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:#93c5fd}
+    /* Login */
+    #auth{min-height:100vh;display:grid;place-items:center;padding:24px}
+    .login-card{width:min(480px,100%);background:var(--card);border:1px solid #0b2a2f;border-radius:12px;padding:20px}
+    .login-card h1{margin:0 0 8px;font-size:22px}
+    .login-card p{margin:0 0 14px;color:var(--muted)}
+    .login-card label{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+    .login-card input[type="text"],
+    .login-card input[type="password"],
+    .login-card input[type="checkbox"],
+    .login-card button{padding:10px;border-radius:8px;border:1px solid #0b2a2f;background:#0b1416;color:var(--text)}
+    .login-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+    .btn-primary{background:var(--accent);border-color:var(--accent)}
+    .error{color:#fecaca;margin-top:8px;display:none}
+
+    /* App */
+    header{padding:16px 16px 8px;position:sticky;top:0;background:linear-gradient(180deg,rgba(11,20,22,.95),rgba(11,20,22,.85));backdrop-filter:blur(6px);border-bottom:1px solid #0b2a2f;z-index:3}
+    h1{margin:0 0 12px;font-size:20px}
+    #summary{display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:8px}
+    .card{background:var(--card);padding:10px;border-radius:10px;border:1px solid #0b2a2f}
+    .card span{color:var(--muted);font-size:12px}
+    .card strong{display:block;margin-top:4px;font-size:18px}
+    .small{font-size:12px;display:flex;justify-content:space-between;margin-top:6px;color:#cbd5e1}
+    main{padding:16px;display:grid;gap:16px}
+    section{background:var(--card);padding:12px;border-radius:10px;border:1px solid #0b2a2f}
+    h2{margin:0 0 10px;font-size:16px;color:#cbd5e1}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(min-width:1024px){main{grid-template-columns:1fr 1fr} #list, #monthly {grid-column:1/-1}}
+    label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#cbd5e1}
+    input,select,button{padding:10px;border-radius:8px;border:1px solid #0b2a2f;background:#0b1416;color:var(--text)}
+    input::placeholder{color:#7b8a9a}
+    .hint{color:#94a3b8;font-size:11px;margin-top:4px}
+    .actions{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+    .actions .spacer{flex:1}
+    button.primary{background:var(--accent);border-color:var(--accent)}
+    button.secondary{background:#0b1416}
+    button.link{background:transparent;border:none;color:#93c5fd;text-decoration:underline;padding:4px 6px}
+    button.danger{background:var(--danger);border-color:var(--danger)}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid #0b2a2f;padding:10px;vertical-align:top}
+    th{text-align:left;color:#93a4b3;font-weight:600;position:sticky;top:0;background:var(--card);z-index:2}
+    td.num{text-align:right}
+    tfoot td{font-weight:600}
+    .muted{color:var(--muted)}
+    footer{padding:12px 16px;color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;border:1px solid #334155;border-radius:999px;padding:2px 8px;font-size:12px}
+    .grid{display:grid;gap:8px}
+    .grid.cols-4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+    .table-wrap{overflow:auto}
+    .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+    .kpi .k{background:#0b1416;border:1px solid #0b2a2f;border-radius:10px;padding:10px}
+    .kpi .k span{display:block;color:#94a3b8;font-size:12px}
+    .kpi .k strong{display:block;font-size:18px;margin-top:6px}
+    .topbar{display:flex;justify-content:space-between;align-items:center}
+    #logout-btn{padding:8px 10px;border-radius:8px;border:1px solid #0b2a2f;background:#0b1416;color:#e2e8f0}
+    #toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#0f1f23;border:1px solid #0b2a2f;padding:10px 14px;border-radius:8px;display:none;z-index:50}
+    #toast.ok{border-color:#134e4a}
+    #toast.err{border-color:#7f1d1d}
   </style>
 </head>
-<body class="container py-4">
+<body>
 
-  <!-- Dashboard -->
-  <h2 class="text-center mb-4">Restaurant Accounts Manager</h2>
-  <div class="row text-center mb-4">
-    <div class="col-md-4">
-      <div class="dashboard-card">
-        <h4>Total Income</h4>
-        <p id="totalIncome">0</p>
+<!-- LOGIN SCREEN -->
+<section id="auth">
+  <div class="login-card">
+    <h1>Log in</h1>
+    <p>Log in to manage restaurant accounts</p>
+    <form id="login-form">
+      <label>Username
+        <input type="text" id="login-username" placeholder="Username" autocomplete="username" required />
+      </label>
+      <label>Password
+        <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" required />
+      </label>
+      <div class="login-row">
+        <label style="flex-direction:row;align-items:center;gap:8px">
+          <input type="checkbox" id="login-remember" /> Remember me
+        </label>
+        <button class="btn-primary" type="submit">Login</button>
       </div>
-    </div>
-    <div class="col-md-4">
-      <div class="dashboard-card">
-        <h4>Total Expense</h4>
-        <p id="totalExpense">0</p>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="dashboard-card">
-        <h4>Net</h4>
-        <p id="netAmount">0</p>
-      </div>
-    </div>
+      <div id="login-error" class="error">Invalid credentials. Try <strong>admin / admin</strong>.</div>
+    </form>
   </div>
+</section>
 
-  <!-- Add/Edit Entry -->
-  <h3 class="section-title">Add / Edit Entry</h3>
-  <form id="entryForm" class="row g-3 mb-4">
-    <div class="col-md-3">
-      <input type="date" class="form-control" id="date" required>
+<!-- APP (hidden until login) -->
+<div id="app" style="display:none">
+  <header>
+    <div class="topbar">
+      <h1>Restaurant Accounts (Supabase)</h1>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="sync-ind" class="muted">Idle</span>
+        <button id="logout-btn" title="Logout">Logout</button>
+      </div>
     </div>
-    <div class="col-md-2">
-      <select class="form-select" id="type" required>
-        <option value="">Type</option>
-        <option value="Income">Income</option>
-        <option value="Expense">Expense</option>
-      </select>
+    <div id="summary">
+      <div class="card"><span>Total Income</span><strong id="sum-income">0.000</strong></div>
+      <div class="card"><span>Total Expense</span><strong id="sum-expense">0.000</strong></div>
+      <div class="card"><span>Net</span><strong id="sum-net">0.000</strong></div>
+
+      <div class="card">
+        <span>Cash</span>
+        <div class="small"><em>Income</em><em id="cash-inc">0.000</em></div>
+        <div class="small"><em>Expense</em><em id="cash-exp">0.000</em></div>
+      </div>
+      <div class="card">
+        <span>Benefit</span>
+        <div class="small"><em>Income</em><em id="ben-inc">0.000</em></div>
+        <div class="small"><em>Expense</em><em id="ben-exp">0.000</em></div>
+      </div>
     </div>
-    <div class="col-md-2">
-      <select class="form-select" id="account" required>
-        <option value="">Account</option>
-        <option value="Cash">Cash</option>
-        <option value="Benefit">Benefit</option>
-      </select>
-    </div>
-    <div class="col-md-2">
-      <input type="number" class="form-control" id="amount" placeholder="Amount" required>
-    </div>
-    <div class="col-md-3">
-      <input type="text" class="form-control" id="description" placeholder="Description">
-    </div>
-    <div class="col-12 text-end">
-      <button type="submit" class="btn btn-custom">Save</button>
-      <button type="reset" class="btn btn-secondary">Reset</button>
-    </div>
-  </form>
+  </header>
+  <main>
+    <section id="entry">
+      <h2>Add / Edit Entry</h2>
+      <form id="entry-form">
+        <input type="hidden" id="entry-id" />
+        <div class="row">
+          <label>Date
+            <input type="date" id="date" required />
+            <span class="hint">Dates are displayed & CSV-exported as <strong>dd/mm/yyyy</strong>.</span>
+          </label>
+          <label>Type
+            <select id="type" required>
+              <option value="Income">Income</option>
+              <option value="Expense" selected>Expense</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <label>Cash / Account
+            <select id="account" required>
+              <option value="Cash">Cash</option>
+              <option value="Benefit">Benefit</option>
+            </select>
+          </label>
+          <label>Amount
+            <input type="number" id="amount" step="0.001" min="0" inputmode="decimal" placeholder="0.000" required />
+          </label>
+        </div>
+        <label>Description
+          <input type="text" id="description" placeholder="e.g., Lunch sales, Vegetables, Supplier invoice" />
+        </label>
+        <div class="actions">
+          <button type="submit" class="primary">Save</button>
+          <button type="button" id="reset-btn" class="secondary">Reset</button>
+        </div>
+      </form>
+    </section>
 
-  <!-- Entries Table -->
-  <h3 class="section-title">Entries</h3>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Type</th>
-        <th>Account</th>
-        <th>Amount</th>
-        <th>Description</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="entriesTable">
-      <tr><td colspan="6" class="text-center">No entries yet</td></tr>
-    </tbody>
-  </table>
+    <section id="daily-sales">
+      <h2>Daily Sales (from entries)</h2>
+      <div class="row">
+        <label>Date
+          <input type="date" id="ds-date" />
+        </label>
+        <div class="actions">
+          <button id="ds-refresh" class="secondary" type="button">Refresh</button>
+          <div class="spacer"></div>
+          <button id="ds-export-csv" class="secondary" type="button">Export Day CSV</button>
+        </div>
+      </div>
+      <div class="kpi" id="ds-kpi">
+        <div class="k"><span>Cash Income</span><strong id="ds-cash-inc">0.000</strong></div>
+        <div class="k"><span>Benefit Income</span><strong id="ds-ben-inc">0.000</strong></div>
+        <div class="k"><span>Total Daily Sales</span><strong id="ds-total-sales">0.000</strong></div>
+        <div class="k"><span>Cash Expense</span><strong id="ds-cash-exp">0.000</strong></div>
+        <div class="k"><span>Benefit Expense</span><strong id="ds-ben-exp">0.000</strong></div>
+        <div class="k"><span>Daily Net</span><strong id="ds-net">0.000</strong></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Account</th>
+              <th class="num">Amount</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="ds-rows"></tbody>
+        </table>
+      </div>
+    </section>
 
-  <!-- ✅ Load Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-// ✅ Initialize Supabase AFTER the library is loaded
-    const supabaseUrl = "https://hdtbveombnhozbxognvr.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM";
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    <section id="filters">
+      <h2>Filter</h2>
+      <div class="row">
+        <label>From
+          <input type="date" id="filter-from" />
+        </label>
+        <label>To
+          <input type="date" id="filter-to" />
+        </label>
+        <label>Type
+          <select id="filter-type">
+            <option value="All">All</option>
+            <option value="Income">Income</option>
+            <option value="Expense">Expense</option>
+          </select>
+        </label>
+        <label>Account
+          <select id="filter-account">
+            <option value="All">All</option>
+            <option value="Cash">Cash</option>
+            <option value="Benefit">Benefit</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button id="apply-filter" class="secondary">Apply</button>
+        <button id="clear-filter" class="secondary">Clear</button>
+        <div class="spacer"></div>
+        <button id="export-json" class="secondary">Export JSON</button>
+        <button id="export-csv" class="secondary">Export CSV</button>
+        <button id="export-xlsx" class="secondary">Export Excel (.xlsx)</button>
+        <label class="pill">Import JSON<input type="file" id="import-json" accept="application/json" hidden></label>
+      </div>
+    </section>
 
-    // ✅ Add Entry
-    document.getElementById('entryForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const date = document.getElementById('date').value;
-      const type = document.getElementById('type').value;
-      const account = document.getElementById('account').value;
-      const amount = parseFloat(document.getElementById('amount').value);
-      const description = document.getElementById('description').value;
+    <section id="list">
+      <h2>Entries</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:120px">Date (dd/mm/yyyy)</th>
+              <th>Type</th>
+              <th>Cash/Account</th>
+              <th class="num">Amount</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="entries"></tbody>
+        </table>
+      </div>
+      <p id="empty" class="muted">No entries yet. Add your first one above.</p>
+    </section>
 
-      const { data, error } = await supabaseClient
-        .from('entries')
-        .insert([{ date, type, account, amount, description }]);
+    <section id="monthly">
+      <h2>Monthly Report</h2>
+      <div class="row">
+        <label>Month
+          <input type="month" id="report-month" />
+        </label>
+        <div class="actions">
+          <button id="report-generate" class="secondary">Generate</button>
+          <div class="spacer"></div>
+          <button id="report-export-csv" class="secondary">Export Report CSV</button>
+        </div>
+      </div>
 
-      if (error) {
-        alert('Error adding entry: ' + error.message);
-      } else {
-        alert('Entry added successfully!');
-        loadEntries();
-      }
-    });
+      <div id="report-cards" class="grid cols-4"></div>
 
-    // ✅ Load Entries
-    async function loadEntries() {
-      const { data, error } = await supabaseClient
-        .from('entries')
-        .select('*')
-        .order('date', { ascending: false });
+      <div class="table-wrap">
+        <table id="report-table">
+          <thead>
+            <tr>
+              <th style="min-width:120px">Date</th>
+              <th class="num">Daily Sales</th>
+              <th class="num">Cash Income</th>
+              <th class="num">Cash Expense</th>
+              <th class="num">Benefit Income</th>
+              <th class="num">Benefit Expense</th>
+              <th class="num">Daily Net</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p class="muted">Data is saved in Supabase (table <code>entries</code>). Excel export needs internet the first time to load the library.</p>
+  </footer>
+</div>
+<div id="toast"></div>
 
-      const tableBody = document.getElementById('entriesTable');
-      tableBody.innerHTML = '';
+<!-- Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
 
-      if (error) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">Error loading entries</td></tr>';
-        return;
-      }
+<script>
+  // ====== AUTH (simple front-end gate) ======
+  const AUTH_KEY = 'acct_auth_user';
+  function isAuthed(){ return !!(localStorage.getItem(AUTH_KEY) || sessionStorage.getItem(AUTH_KEY)); }
+  function showApp(){ document.getElementById('auth').style.display='none'; document.getElementById('app').style.display='block'; }
+  function showLogin(){ document.getElementById('app').style.display='none'; document.getElementById('auth').style.display='grid'; }
+  function login(username, password, remember){ if (username==='admin' && password==='admin'){ if (remember) localStorage.setItem(AUTH_KEY,'admin'); else sessionStorage.setItem(AUTH_KEY,'admin'); return true; } return false; }
+  function logout(){ localStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(AUTH_KEY); showLogin(); }
 
-      if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No entries yet</td></tr>';
-        return;
-      }
+  // Login form events
+  document.addEventListener('DOMContentLoaded', () => {
+    const lf = document.getElementById('login-form'); const err = document.getElementById('login-error');
+    lf.addEventListener('submit', (e)=>{ e.preventDefault(); err.style.display='none'; const u=document.getElementById('login-username').value.trim(); const p=document.getElementById('login-password').value; const r=document.getElementById('login-remember').checked; if (login(u,p,r)){ initApp(); showApp(); } else { err.style.display='block'; }});
+    document.getElementById('logout-btn')?.addEventListener('click', ()=> logout());
+    if (isAuthed()) { initApp(); showApp(); }
+  });
 
-      let totalIncome = 0, totalExpense = 0;
+  // ====== SUPABASE CLIENT ======
+  const SUPABASE_URL = "https://hdtbveombnhozbxognvr.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhkdGJ2ZW9tYm5ob3pieG9nbnZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjc4NDMsImV4cCI6MjA3NDgwMzg0M30.J1gETcvnnd47IyumvjzNGLMADQjQdcsnbr6SQOGSpsM";
+  const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const TABLE = 'entries';
 
-      data.forEach(entry => {
-        if (entry.type === 'Income') totalIncome += entry.amount;
-        else totalExpense += entry.amount;
+  // ====== APP STATE ======
+  let entries = []; // cached full set from DB
 
-        const row = `
-          <tr>
-            <td>${entry.date}</td>
-            <td>${entry.type}</td>
-            <td>${entry.account}</td>
-            <td>${entry.amount}</td>
-            <td>${entry.description || ''}</td>
-            <td><button class="btn btn-sm btn-danger" onclick="deleteEntry(${entry.id})">Delete</button></td>
-          </tr>
-        `;
-        tableBody.innerHTML += row;
-      });
+  // ====== UI helpers ======
+  function toast(msg, ok=true){ const t=document.getElementById('toast'); t.textContent=msg; t.className = ok? 'ok':'err'; t.style.display='block'; setTimeout(()=> t.style.display='none', 2000); }
+  function setSync(state){ document.getElementById('sync-ind').textContent = state; }
 
-      document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
-      document.getElementById('totalExpense').textContent = totalExpense.toFixed(2);
-      document.getElementById('netAmount').textContent = (totalIncome - totalExpense).toFixed(2);
-    }
+  // ====== Date helpers ======
+  function toDDMMYYYY(iso){ if(!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+  function todayISO(){ const d=new Date(); const off=d.getTimezoneOffset(); return new Date(d.getTime()-off*60000).toISOString().slice(0,10); }
+  function toISO(d){ return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+  function monthStartEndISO(ym){ const [y,m]=ym.split('-').map(Number); const start=new Date(y,m-1,1); const end=new Date(y,m,0); return {startISO:toISO(start), endISO:toISO(end)}; }
+  function fmt(n){ const fixed = Number(n||0).toFixed(3); return fixed.replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 
-    // ✅ Delete Entry
-    async function deleteEntry(id) {
-      const { error } = await supabaseClient
-        .from('entries')
-        .delete()
-        .eq('id', id);
+  // ====== DB MAPPERS ======
+  function mapRow(r){
+    return {
+      id: r.id,
+      date: r.date,
+      type: r.type,
+      account: r.account,
+      amount: Number(r.amount),
+      description: r.description || '',
+      createdAt: r.created_at ? Date.parse(r.created_at) : (r.createdAt || Date.now())
+    };
+  }
 
-      if (error) {
-        alert('Error deleting entry: ' + error.message);
-      } else {
-        alert('Entry deleted successfully!');
-        loadEntries();
-      }
-    }
+  // ====== DB OPS ======
+  async function loadAll(){
+    setSync('Loading...');
+    const { data, error } = await supa.from(TABLE).select('*');
+    if (error) { setSync('Error'); console.error(error); toast('Load failed: '+error.message, false); return; }
+    entries = (data||[]).map(mapRow);
+    setSync('Idle');
+  }
 
-    // Load entries on page load
-    loadEntries();
-  </script>
+  async function insertEntry(e){
+    setSync('Saving...');
+    const row = { id:e.id, date:e.date, type:e.type, account:e.account, amount:e.amount, description:e.description, created_at: new Date().toISOString() };
+    const { error } = await supa.from(TABLE).insert([row]);
+    if (error) { setSync('Error'); toast('Save failed: '+error.message, false); throw error; }
+    setSync('Idle');
+  }
+  async function updateEntry(e){
+    setSync('Saving...');
+    const patch = { date:e.date, type:e.type, account:e.account, amount:e.amount, description:e.description };
+    const { error } = await supa.from(TABLE).update(patch).eq('id', e.id);
+    if (error) { setSync('Error'); toast('Update failed: '+error.message, false); throw error; }
+    setSync('Idle');
+  }
+  async function deleteEntry(id){
+    setSync('Deleting...');
+    const { error } = await supa.from(TABLE).delete().eq('id', id);
+    if (error) { setSync('Error'); toast('Delete failed: '+error.message, false); throw error; }
+    setSync('Idle');
+  }
+  async function upsertMany(list){
+    setSync('Importing...');
+    const rows = list.map(e=>({ id:e.id, date:e.date, type:e.type, account:e.account, amount:e.amount, description:e.description, created_at: (e.createdAt? new Date(e.createdAt).toISOString() : new Date().toISOString()) }));
+    const { error } = await supa.from(TABLE).upsert(rows, { onConflict:'id' });
+    if (error) { setSync('Error'); toast('Import failed: '+error.message, false); throw error; }
+    setSync('Idle');
+  }
+
+  // ====== Filters & compute ======
+  function getFilters(){ return { from: document.getElementById('filter-from').value || null, to: document.getElementById('filter-to').value || null, type: document.getElementById('filter-type').value, account: document.getElementById('filter-account').value }; }
+  function applyFilters(list){ const f=getFilters(); return list.filter(e=>{ if (f.from && e.date < f.from) return false; if (f.to && e.date > f.to) return false; if (f.type !== 'All' && e.type !== f.type) return false; if (f.account !== 'All' && e.account !== f.account) return false; return true; }); }
+  function computeSums(list){ let inc=0, exp=0, cashInc=0, cashExp=0, benInc=0, benExp=0; for(const e of list){ const amt=Number(e.amount||0); if (e.type==='Income'){ inc+=amt; if (e.account==='Cash') cashInc+=amt; else if (e.account==='Benefit') benInc+=amt; } else { exp+=amt; if (e.account==='Cash') cashExp+=amt; else if (e.account==='Benefit') benExp+=amt; } } return {inc,exp,cashInc,cashExp,benInc,benExp}; }
+
+  // ====== Render ======
+  function render(){
+    const tbody = document.getElementById('entries'); tbody.innerHTML='';
+    const filtered = applyFilters([...entries]).sort((a,b)=> (a.date===b.date? b.createdAt-a.createdAt : a.date.localeCompare(b.date)) );
+    document.getElementById('empty').style.display = filtered.length ? 'none' : 'block';
+    const sums = computeSums(filtered);
+    for(const e of filtered){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${toDDMMYYYY(e.date)}</td><td>${e.type}</td><td>${e.account}</td><td class="num ${e.type==='Expense'?'muted':''}">${fmt(e.amount)}</td><td>${e.description||''}</td><td><button class="link" data-action="edit" data-id="${e.id}">Edit</button><button class="link" data-action="delete" data-id="${e.id}">Delete</button></td>`; tbody.appendChild(tr); }
+    document.getElementById('sum-income').textContent = fmt(sums.inc);
+    document.getElementById('sum-expense').textContent = fmt(sums.exp);
+    document.getElementById('sum-net').textContent = fmt(sums.inc - sums.exp);
+    document.getElementById('cash-inc').textContent = fmt(sums.cashInc);
+    document.getElementById('cash-exp').textContent = fmt(sums.cashExp);
+    document.getElementById('ben-inc').textContent  = fmt(sums.benInc);
+    document.getElementById('ben-exp').textContent  = fmt(sums.benExp);
+    updateDailyPanel();
+  }
+
+  // ====== Daily Sales (from entries) ======
+  function getDayEntries(dateISO){ return entries.filter(e=> e.date===dateISO); }
+  function calcDayTotals(dateISO){ const list=getDayEntries(dateISO); let cashInc=0,benInc=0,cashExp=0,benExp=0; for(const e of list){ const amt=Number(e.amount||0); if (e.account==='Cash'){ if (e.type==='Income') cashInc+=amt; else cashExp+=amt; } else if (e.account==='Benefit'){ if (e.type==='Income') benInc+=amt; else benExp+=amt; } } const totalSales=cashInc+benInc; const net= totalSales - (cashExp+benExp); return {cashInc,benInc,cashExp,benExp,totalSales,net,list}; }
+  function updateDailyPanel(){ const dateISO = document.getElementById('ds-date').value || todayISO(); const t=calcDayTotals(dateISO); document.getElementById('ds-cash-inc').textContent=fmt(t.cashInc); document.getElementById('ds-ben-inc').textContent=fmt(t.benInc); document.getElementById('ds-total-sales').textContent=fmt(t.totalSales); document.getElementById('ds-cash-exp').textContent=fmt(t.cashExp); document.getElementById('ds-ben-exp').textContent=fmt(t.benExp); document.getElementById('ds-net').textContent=fmt(t.net); const tb=document.getElementById('ds-rows'); tb.innerHTML=''; for(const e of t.list.sort((a,b)=> (a.type===b.type? a.account.localeCompare(b.account) : a.type.localeCompare(b.type)))){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${e.type}</td><td>${e.account}</td><td class="num ${e.type==='Expense'?'muted':''}">${fmt(e.amount)}</td><td>${e.description||''}</td>`; tb.appendChild(tr); } }
+  function exportDayCSV(){ const dateISO = document.getElementById('ds-date').value || todayISO(); const t=calcDayTotals(dateISO); const lines=[]; lines.push(`Daily Summary,${toDDMMYYYY(dateISO)}`); lines.push('Metric,Amount'); lines.push('Cash Income,'+t.cashInc); lines.push('Benefit Income,'+t.benInc); lines.push('Total Sales,'+t.totalSales); lines.push('Cash Expense,'+t.cashExp); lines.push('Benefit Expense,'+t.benExp); lines.push('Net,'+t.net); lines.push(''); lines.push('Entries'); lines.push('Type,Account,Amount,Description'); for(const e of t.list){ lines.push([e.type,e.account,e.amount,(e.description||'').replaceAll(',', ' ')].join(',')); } const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`daily-${dateISO}.csv`; a.click(); URL.revokeObjectURL(url); }
+
+  // ====== Monthly ======
+  function buildReportCards(sums){ const wrap=document.getElementById('report-cards'); wrap.innerHTML=''; const items=[ {title:'Total Sales (Income)', value:fmt(sums.inc)}, {title:'Total Expense', value:fmt(sums.exp)}, {title:'Net', value:fmt(sums.inc - sums.exp)}, {title:'Cash Income', value:fmt(sums.cashInc)}, {title:'Cash Expense', value:fmt(sums.cashExp)}, {title:'Benefit Income', value:fmt(sums.benInc)}, {title:'Benefit Expense', value:fmt(sums.benExp)} ]; for(const it of items){ const div=document.createElement('div'); div.className='card'; div.innerHTML=`<span>${it.title}</span><strong>${it.value}</strong>`; wrap.appendChild(div); } }
+  function generateMonthlyReport(){ const ym=document.getElementById('report-month').value; if(!ym){ alert('Select a month'); return; } const {startISO,endISO}=monthStartEndISO(ym); const list=entries.filter(e=> e.date>=startISO && e.date<=endISO ); const sums=computeSums(list); buildReportCards(sums); const daily=new Map(); for(const e of list){ if(!daily.has(e.date)) daily.set(e.date, {cashInc:0,cashExp:0,benInc:0,benExp:0}); const d=daily.get(e.date); const amt=Number(e.amount||0); if (e.account==='Cash'){ if (e.type==='Income') d.cashInc+=amt; else d.cashExp+=amt; } else if (e.account==='Benefit'){ if (e.type==='Income') d.benInc+=amt; else d.benExp+=amt; } } const tbody=document.querySelector('#report-table tbody'); const tfoot=document.querySelector('#report-table tfoot'); tbody.innerHTML=''; tfoot.innerHTML=''; let Tsales=0,TcashInc=0,TcashExp=0,TbenInc=0,TbenExp=0; const dates=[...daily.keys()].sort(); for(const iso of dates){ const d=daily.get(iso); const sales=d.cashInc+d.benInc; const net=sales-(d.cashExp+d.benExp); const tr=document.createElement('tr'); tr.innerHTML=`<td>${toDDMMYYYY(iso)}</td><td class="num">${fmt(sales)}</td><td class="num">${fmt(d.cashInc)}</td><td class="num">${fmt(d.cashExp)}</td><td class="num">${fmt(d.benInc)}</td><td class="num">${fmt(d.benExp)}</td><td class="num">${fmt(net)}</td>`; tbody.appendChild(tr); Tsales+=sales; TcashInc+=d.cashInc; TcashExp+=d.cashExp; TbenInc+=d.benInc; TbenExp+=d.benExp; } const Tnet=(TcashInc+TbenInc)-(TcashExp+TbenExp); const trf=document.createElement('tr'); trf.innerHTML=`<td>Total</td><td class="num">${fmt(Tsales)}</td><td class="num">${fmt(TcashInc)}</td><td class="num">${fmt(TcashExp)}</td><td class="num">${fmt(TbenInc)}</td><td class="num">${fmt(TbenExp)}</td><td class="num">${fmt(Tnet)}</td>`; tfoot.appendChild(trf); generateMonthlyReport._last={ ym, rows: dates.map(iso=>({date:toDDMMYYYY(iso), sales:(daily.get(iso).cashInc + daily.get(iso).benInc), cashInc:daily.get(iso).cashInc, cashExp:daily.get(iso).cashExp, benInc:daily.get(iso).benInc, benExp:daily.get(iso).benExp, net:(daily.get(iso).cashInc + daily.get(iso).benInc) - (daily.get(iso).cashExp + daily.get(iso).benExp)})), totals: {Tsales,TcashInc,TcashExp,TbenInc,TbenExp,Tnet}, sums }; }
+  function exportMonthlyCSV(){ const last=generateMonthlyReport._last; if(!last){ alert('Generate the monthly report first.'); return; } const lines=[]; lines.push(`Monthly Report, ${last.ym}`); lines.push('Date,Daily Sales,Cash Income,Cash Expense,Benefit Income,Benefit Expense,Net'); for(const r of last.rows){ lines.push([r.date,r.sales,r.cashInc,r.cashExp,r.benInc,r.benExp,r.net].join(',')); } lines.push('Total,'+[last.totals.Tsales,last.totals.TcashInc,last.totals.TcashExp,last.totals.TbenInc,last.totals.TbenExp,last.totals.Tnet].join(',')); lines.push(''); lines.push('Summary'); lines.push('Metric,Value'); lines.push('Total Sales (Income),'+last.sums.inc); lines.push('Total Expense,'+last.sums.exp); lines.push('Net,'+(last.sums.inc-last.sums.exp)); const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`monthly-report-${last.ym}.csv`; a.click(); URL.revokeObjectURL(url); }
+
+  // ====== Export / Import (all entries) ======
+  function exportJSON(){ const blob=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='restaurant-accounts.json'; a.click(); URL.revokeObjectURL(url); }
+  function exportCSV(){ const header=['id','date','type','account','amount','description']; const lines=[header.join(',')]; for(const e of entries){ const row=[e.id, toDDMMYYYY(e.date), e.type, (e.account||'').replaceAll(',', ' '), e.amount, (e.description||'').replaceAll(',', ' ')]; lines.push(row.join(',')); } const blob=new Blob([lines.join('\n')],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='restaurant-accounts.csv'; a.click(); URL.revokeObjectURL(url); }
+  function dateFromISOToLocalDate(iso){ const [y,m,d]=iso.split('-').map(Number); return new Date(y,m-1,d); }
+  function exportExcel(){ if (typeof XLSX==='undefined'){ alert('Excel export needs internet connection the first time.'); return; } const wb=XLSX.utils.book_new(); const data=[['Date','Type','Account','Amount','Description']]; for(const e of entries){ data.push([dateFromISOToLocalDate(e.date), e.type, e.account, Number(e.amount||0), e.description||'']); } const ws=XLSX.utils.aoa_to_sheet(data); const range=XLSX.utils.decode_range(ws['!ref']); for(let R=1; R<=range.e.r; ++R){ const c=ws[XLSX.utils.encode_cell({r:R,c:0})]; if(c) c.z='dd/mm/yyyy'; } for(let R=1; R<=range.e.r; ++R){ const c=ws[XLSX.utils.encode_cell({r:R,c:3})]; if(c) c.t='n'; } XLSX.utils.book_append_sheet(wb, ws, 'Entries'); const {inc,exp,cashInc,cashExp,benInc,benExp} = computeSums(entries); const ws2=XLSX.utils.aoa_to_sheet([ ['Metric','Value'], ['Total Income', inc], ['Total Expense', exp], ['Net', inc-exp], [], ['Account','Income','Expense','Net'], ['Cash', cashInc, cashExp, cashInc-cashExp], ['Benefit', benInc, benExp, benInc-benExp] ]); XLSX.utils.book_append_sheet(wb, ws2, 'Summary'); XLSX.writeFile(wb, 'restaurant-accounts.xlsx'); }
+  async function importJSONFile(file){ const reader=new FileReader(); reader.onload=async ()=>{ try{ const data=JSON.parse(reader.result); if(!Array.isArray(data)) throw new Error('Invalid format'); const norm = data.map(e=>({ id: e.id || ('t_'+Math.random().toString(36).slice(2,8)+Date.now().toString(36)), date: (e.date && e.date.includes('/')) ? ( ()=>{ const [d,m,y]=e.date.split('/'); return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`; })() : e.date, type:e.type, account:e.account, amount: Number(e.amount||0), description: e.description||'', createdAt: e.createdAt || Date.now() })); await upsertMany(norm); await reloadAndRender(); toast('Import completed', true); } catch(err){ toast('Import failed: '+err.message, false); } }; reader.readAsText(file); }
+
+  // ====== UI wire-up & lifecycle ======
+  function clearForm(){ document.getElementById('entry-id').value=''; document.getElementById('date').value=todayISO(); document.getElementById('type').value='Expense'; document.getElementById('account').value='Cash'; document.getElementById('amount').value=''; document.getElementById('description').value=''; }
+  function fillForm(e){ document.getElementById('entry-id').value=e.id; document.getElementById('date').value=e.date; document.getElementById('type').value=e.type; document.getElementById('account').value=e.account; document.getElementById('amount').value=e.amount; document.getElementById('description').value=e.description||''; window.scrollTo({top:0,behavior:'smooth'}); }
+
+  async function reloadAndRender(){ await loadAll(); render(); }
+
+  async function initApp(){
+    const now=new Date(); const first=new Date(now.getFullYear(), now.getMonth(), 1); const last=new Date(now.getFullYear(), now.getMonth()+1, 0);
+    document.getElementById('filter-from').value = toISO(first);
+    document.getElementById('filter-to').value = toISO(last);
+    document.getElementById('filter-type').value = 'All';
+    document.getElementById('filter-account').value = 'All';
+    document.getElementById('report-month').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    document.getElementById('ds-date').value = toISO(now);
+
+    await reloadAndRender();
+    generateMonthlyReport();
+
+    document.getElementById('entry-form').addEventListener('submit', async (ev)=>{ ev.preventDefault(); const id = document.getElementById('entry-id').value || ('t_'+Math.random().toString(36).slice(2,8)+Date.now().toString(36)); const e={ id, date: document.getElementById('date').value, type: document.getElementById('type').value, account: document.getElementById('account').value, amount: Number(document.getElementById('amount').value), description: document.getElementById('description').value.trim() }; if (!e.date) return alert('Please select a date'); if (!e.account) return alert('Please choose Cash/Account'); if (!(e.amount >= 0)) return alert('Please enter a valid amount'); const exists = entries.find(x=>x.id===id); try{ if (exists) await updateEntry(e); else await insertEntry(e); await reloadAndRender(); clearForm(); toast('Saved', true); }catch(err){} });
+
+    document.getElementById('reset-btn').addEventListener('click', clearForm);
+
+    document.querySelector('#list table').addEventListener('click', async (ev)=>{ const btn=ev.target.closest('button'); if(!btn) return; const id=btn.getAttribute('data-id'); const entry=entries.find(e=>e.id===id); if(!entry) return; const action=btn.getAttribute('data-action'); if(action==='edit') fillForm(entry); else if (action==='delete'){ if (confirm('Delete this entry?')){ try{ await deleteEntry(id); await reloadAndRender(); toast('Deleted', true); }catch(err){} } } });
+
+    document.getElementById('apply-filter').addEventListener('click', render);
+    document.getElementById('clear-filter').addEventListener('click', ()=>{ document.getElementById('filter-from').value=''; document.getElementById('filter-to').value=''; document.getElementById('filter-type').value='All'; document.getElementById('filter-account').value='All'; render(); });
+
+    document.getElementById('export-json').addEventListener('click', exportJSON);
+    document.getElementById('export-csv').addEventListener('click', exportCSV);
+    document.getElementById('export-xlsx').addEventListener('click', exportExcel);
+    document.getElementById('import-json').addEventListener('change', (e)=>{ if (e.target.files && e.target.files[0]) importJSONFile(e.target.files[0]); e.target.value=''; });
+
+    document.getElementById('ds-date').addEventListener('change', updateDailyPanel);
+    document.getElementById('ds-refresh').addEventListener('click', updateDailyPanel);
+    document.getElementById('ds-export-csv').addEventListener('click', exportDayCSV);
+    document.getElementById('report-generate').addEventListener('click', generateMonthlyReport);
+    document.getElementById('report-export-csv').addEventListener('click', exportMonthlyCSV);
+
+    document.getElementById('logout-btn').addEventListener('click', ()=> logout());
+  }
+</script>
 </body>
 </html>
